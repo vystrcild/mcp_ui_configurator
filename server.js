@@ -101,6 +101,72 @@ app.get('/api/search/actors', async (req, res) => {
     }
 });
 
+// Popular actors endpoint (no search, sorted by usage/popularity)
+app.get('/api/popular/actors', async (req, res) => {
+    try {
+        const { limit = 20, offset = 0 } = req.query;
+
+        // Get popular actors without search parameter, should return by popularity
+        const storeParams = new URLSearchParams({
+            limit: Math.min(parseInt(limit), 50),
+            offset: parseInt(offset)
+            // No search parameter = should return popular/trending actors
+        });
+
+        const requestOptions = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json",
+                "Authorization": `Bearer ${process.env.APIFY_TOKEN}`
+            },
+            redirect: "follow"
+        };
+
+        const response = await fetch(`https://api.apify.com/v2/store?${storeParams}`, requestOptions);
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Popular actors API Error:', errorText);
+            throw new Error(`Store API error: ${response.status} - ${errorText}`);
+        }
+
+        const searchResults = await response.json();
+        const paginatedItems = searchResults.data?.items || [];
+
+        // Transform results to match our expected format
+        const transformedItems = paginatedItems.map(actor => {
+            return {
+                id: actor.id,
+                title: actor.title || actor.name,
+                path: `${actor.username}/${actor.name}`,
+                description: actor.description || '',
+                icon: actor.pictureUrl || null,
+                username: actor.username,
+                name: actor.name,
+                stats: {
+                    totalRuns: actor.stats?.totalRuns || 0,
+                    lastRunFinishedAt: actor.stats?.lastRunFinishedAt
+                }
+            };
+        });
+
+        res.json({
+            items: transformedItems,
+            total: searchResults.data?.total || transformedItems.length,
+            count: transformedItems.length,
+            limit: parseInt(limit),
+            offset: parseInt(offset)
+        });
+
+    } catch (error) {
+        console.error('Popular actors error:', error);
+        res.status(500).json({ 
+            error: 'Failed to fetch popular actors',
+            message: error.message 
+        });
+    }
+});
+
 // Get actor details
 app.get('/api/actors/:userId/:actorName', async (req, res) => {
     try {

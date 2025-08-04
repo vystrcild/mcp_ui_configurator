@@ -79,6 +79,38 @@ class ApifySearch {
         }, delay);
     }
 
+    async getPopularActors(limit = 20) {
+        const cacheKey = `popular-${limit}`;
+        
+        // Check cache first
+        if (this.searchCache.has(cacheKey)) {
+            return this.searchCache.get(cacheKey);
+        }
+
+        try {
+            this.isSearching = true;
+            // Get popular actors without search query - should return by popularity/usage
+            const response = await fetch(`/api/popular/actors?limit=${limit}`);
+            
+            if (!response.ok) {
+                throw new Error(`Popular actors fetch failed: ${response.status}`);
+            }
+
+            const results = await response.json();
+            
+            // Cache results for 10 minutes
+            this.searchCache.set(cacheKey, results);
+            setTimeout(() => this.searchCache.delete(cacheKey), 10 * 60 * 1000);
+            
+            return results;
+        } catch (error) {
+            console.error('Popular actors error:', error);
+            return { items: [], total: 0, count: 0, error: error.message };
+        } finally {
+            this.isSearching = false;
+        }
+    }
+
     clearCache() {
         this.searchCache.clear();
     }

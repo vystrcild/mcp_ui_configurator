@@ -1,8 +1,14 @@
 // Actors data - now empty, will be populated via API search
 const ACTORS_DATA = [];
 
-// Tools data - only optional tools that can be enabled/disabled
+// Tools data - separated into default and optional
 const TOOLS_DATA = [
+  {
+    id: "tool_actor_discovery",
+    name: "Actor discovery and management",
+    description: "Search for Actors, view details, and dynamically add them to your server.",
+    category: "default",
+  },
   {
     id: "tool_apify_docs",
     name: "Apify documentation",

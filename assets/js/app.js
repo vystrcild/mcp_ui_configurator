@@ -1,6 +1,6 @@
 // Global state
 let selectedActors = [];
-let selectedTools = [];
+let selectedTools = ['tool_actor_runs']; // Actor runs selected by default
 let enableDynamicActors = true;
 let useToken = false;
 let modalSelection = [];
@@ -135,25 +135,76 @@ function renderSelectedActors() {
 function renderToolsGrid() {
     elements.toolsGrid.innerHTML = '';
     
-    const optionalTools = TOOLS_DATA.filter(tool => tool.category === 'optional');
+    // Default Tools Section
+    const defaultSection = document.createElement('div');
+    defaultSection.className = 'tools-section';
+    defaultSection.innerHTML = `
+        <h4 class="tools-section-title">Default Tools</h4>
+        <p class="tools-section-description">These tools are always available and cannot be disabled.</p>
+    `;
     
+    const defaultTools = TOOLS_DATA.filter(tool => tool.category === 'default');
+    defaultTools.forEach(tool => {
+        const toolItem = document.createElement('div');
+        toolItem.className = 'tool-item default';
+        toolItem.innerHTML = `
+            <div class="tool-checkbox">
+                <input type="checkbox" checked disabled>
+                <span class="checkmark"></span>
+            </div>
+            <div class="tool-content">
+                <div class="tool-name">${tool.name}</div>
+                <div class="tool-description">${tool.description}</div>
+            </div>
+            <div class="tool-info">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M12 16v-4"/>
+                    <path d="M12 8h.01"/>
+                </svg>
+            </div>
+        `;
+        defaultSection.appendChild(toolItem);
+    });
+    
+    elements.toolsGrid.appendChild(defaultSection);
+    
+    // Optional Tools Section
+    const optionalSection = document.createElement('div');
+    optionalSection.className = 'tools-section';
+    optionalSection.innerHTML = `
+        <h4 class="tools-section-title">Optional Tools</h4>
+        <p class="tools-section-description">These tools must be explicitly enabled and will be included in the server configuration.</p>
+    `;
+    
+    const optionalTools = TOOLS_DATA.filter(tool => tool.category === 'optional');
     optionalTools.forEach(tool => {
         const isSelected = selectedTools.includes(tool.id);
         
-        const toolCard = document.createElement('div');
-        toolCard.className = `tool-card ${isSelected ? 'selected' : ''}`;
-        toolCard.onclick = () => toggleTool(tool.id);
-        
-        toolCard.innerHTML = `
-            <div class="tool-card-header">
-                <div class="tool-icon">${tool.name.charAt(0).toUpperCase()}</div>
-                <div class="tool-title">${tool.name}</div>
+        const toolItem = document.createElement('div');
+        toolItem.className = 'tool-item optional';
+        toolItem.onclick = () => toggleTool(tool.id);
+        toolItem.innerHTML = `
+            <div class="tool-checkbox">
+                <input type="checkbox" ${isSelected ? 'checked' : ''}>
+                <span class="checkmark"></span>
             </div>
-            <div class="tool-description">${tool.description}</div>
+            <div class="tool-content">
+                <div class="tool-name">${tool.name}</div>
+                <div class="tool-description">${tool.description}</div>
+            </div>
+            <div class="tool-info">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M12 16v-4"/>
+                    <path d="M12 8h.01"/>
+                </svg>
+            </div>
         `;
-        
-        elements.toolsGrid.appendChild(toolCard);
+        optionalSection.appendChild(toolItem);
     });
+    
+    elements.toolsGrid.appendChild(optionalSection);
 }
 
 function renderActorsGrid() {
@@ -219,10 +270,10 @@ async function openActorModal() {
     modalSelection = [...selectedActors];
     elements.actorModalOverlay.classList.add('active');
     
-    // Load popular actors by default (search for "web" to get relevant results)
+    // Load popular actors by default (all actors ordered by usage)
     showSearchLoading();
     try {
-        const results = await window.apifySearch.searchActors('web', 20);
+        const results = await window.apifySearch.getPopularActors(20);
         console.log('Modal got results:', results);
         if (results.items && results.items.length > 0) {
             searchResults = results.items;
