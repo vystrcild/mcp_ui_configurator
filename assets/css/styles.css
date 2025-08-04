@@ -108,6 +108,52 @@ body {
     line-height: 1.4;
 }
 
+.sidebar-info {
+    margin-top: 1.5rem;
+}
+
+.docs-callout {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 1rem;
+    background-color: var(--accent);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    transition: all 0.2s ease;
+}
+
+.docs-callout:hover {
+    background-color: var(--secondary);
+    border-color: var(--primary);
+}
+
+.docs-callout svg {
+    color: var(--primary);
+    flex-shrink: 0;
+    margin-top: 0.125rem;
+}
+
+.docs-title {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--foreground);
+    margin: 0 0 0.25rem 0;
+}
+
+.docs-link {
+    font-size: 0.875rem;
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.docs-link:hover {
+    text-decoration: underline;
+    color: var(--primary);
+}
+
 .sidebar-header {
     display: flex;
     align-items: center;
