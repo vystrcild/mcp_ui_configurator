@@ -75,10 +75,12 @@ app.get('/api/search/actors', async (req, res) => {
                 path: `${actor.username}/${actor.name}`,
                 description: actor.description || '',
                 icon: actor.pictureUrl || null, // Don't use fallback here, let frontend handle it
+                pictureUrl: actor.pictureUrl || null,
+                userPictureUrl: actor.userPictureUrl || null,
                 username: actor.username,
                 name: actor.name,
                 stats: {
-                    totalRuns: actor.stats?.totalRuns || 0,
+                    totalUsers: actor.stats?.totalUsers || 0,
                     lastRunFinishedAt: actor.stats?.lastRunFinishedAt
                 }
             };
@@ -141,10 +143,12 @@ app.get('/api/popular/actors', async (req, res) => {
                 path: `${actor.username}/${actor.name}`,
                 description: actor.description || '',
                 icon: actor.pictureUrl || null,
+                pictureUrl: actor.pictureUrl || null,
+                userPictureUrl: actor.userPictureUrl || null,
                 username: actor.username,
                 name: actor.name,
                 stats: {
-                    totalRuns: actor.stats?.totalRuns || 0,
+                    totalUsers: actor.stats?.totalUsers || 0,
                     lastRunFinishedAt: actor.stats?.lastRunFinishedAt
                 }
             };
@@ -184,7 +188,9 @@ app.get('/api/actors/:userId/:actorName', async (req, res) => {
             title: actor.title || actor.name,
             path: `${actor.username}/${actor.name}`,
             description: actor.description || '',
-            icon: actor.pictureUrl || 'assets/images/placeholder.svg',
+            icon: actor.pictureUrl || null,
+            pictureUrl: actor.pictureUrl || null,
+            userPictureUrl: actor.userPictureUrl || null,
             username: actor.username,
             name: actor.name,
             stats: {

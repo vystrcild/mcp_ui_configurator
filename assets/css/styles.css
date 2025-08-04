@@ -1115,11 +1115,6 @@ body {
     line-height: 1.4;
 }
 
-.tool-info {
-    flex-shrink: 0;
-    color: var(--muted-foreground);
-    margin-top: 0.125rem;
-}
 
 /* Config Sections */
 .config-section {
@@ -1591,9 +1586,16 @@ body {
 }
 
 .run-count {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
     font-size: 0.75rem;
     color: var(--muted-foreground);
     font-weight: 500;
+}
+
+.run-count svg {
+    color: var(--muted-foreground);
 }
 
 .rating {
@@ -1606,7 +1608,7 @@ body {
 }
 
 .rating svg {
-    color: #f59e0b;
+    color: #000000;
 }
 
 .actor-modal-card.selected .run-count,

@@ -1,10 +1,32 @@
+// Tools data
+const TOOLS_DATA = [
+    {
+        id: 'tool_actor_runs',
+        name: 'Actor runs',
+        description: 'Get, list, create, update, and delete Actor runs.',
+        category: 'default'
+    },
+    {
+        id: 'tool_apify_docs',
+        name: 'Apify documentation',
+        description: 'Search through Apify documentation to get answers about web scraping and automation.',
+        category: 'optional'
+    },
+    {
+        id: 'tool_apify_storage',
+        name: 'Apify storage',
+        description: 'Manage data in Apify storage - datasets, key-value stores, and request queues.',
+        category: 'optional'
+    }
+];
+
 // Global state
 let selectedActors = [];
 let selectedTools = ['tool_actor_runs']; // Actor runs selected by default
 let enableDynamicActors = true;
 let useToken = false;
 let modalSelection = [];
-let filteredActors = [...ACTORS_DATA];
+let filteredActors = [];
 let searchResults = [];
 let isUsingSearch = false;
 let activeTab = "configuration";
@@ -49,10 +71,19 @@ function setupEventListeners() {
         const query = e.target.value.trim();
         
         if (query.length === 0) {
-            // Reset to local data when search is empty
-            isUsingSearch = false;
-            filteredActors = [...ACTORS_DATA];
-            renderActorsGrid();
+            // Load popular actors when search is empty
+            isUsingSearch = true;
+            showSearchLoading();
+            window.apifySearch.getPopularActors(20).then(results => {
+                if (results.items && results.items.length > 0) {
+                    searchResults = results.items;
+                    renderActorsGrid();
+                } else {
+                    showEmptyState();
+                }
+            }).catch(() => {
+                showSearchError('Failed to load actors');
+            });
         } else if (query.length >= 2) {
             // Use real search for queries with 2+ characters
             isUsingSearch = true;
@@ -67,9 +98,17 @@ function setupEventListeners() {
                 }
             });
         } else {
-            // Show local filtered results for single character
-            isUsingSearch = false;
-            filterActors(query);
+            // For single character, show loading and search
+            isUsingSearch = true;
+            showSearchLoading();
+            window.apifySearch.debouncedSearch(query, (results) => {
+                if (results.error) {
+                    showSearchError(results.error);
+                } else {
+                    searchResults = results.items;
+                    renderActorsGrid();
+                }
+            });
         }
     });
     
@@ -156,13 +195,6 @@ function renderToolsGrid() {
                 <div class="tool-name">${tool.name}</div>
                 <div class="tool-description">${tool.description}</div>
             </div>
-            <div class="tool-info">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="10"/>
-                    <path d="M12 16v-4"/>
-                    <path d="M12 8h.01"/>
-                </svg>
-            </div>
         `;
         defaultSection.appendChild(toolItem);
     });
@@ -192,13 +224,6 @@ function renderToolsGrid() {
             <div class="tool-content">
                 <div class="tool-name">${tool.name}</div>
                 <div class="tool-description">${tool.description}</div>
-            </div>
-            <div class="tool-info">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="10"/>
-                    <path d="M12 16v-4"/>
-                    <path d="M12 8h.01"/>
-                </svg>
             </div>
         `;
         optionalSection.appendChild(toolItem);
@@ -237,22 +262,36 @@ function renderActorsGrid() {
         actorCard.className = `actor-modal-card ${isSelected ? 'selected' : ''}`;
         actorCard.onclick = () => toggleActorSelection(actor);
         
-        // Format run count similar to Apify Store
-        const formatRunCount = (count) => {
+        // Format user count similar to Apify Store
+        const formatUserCount = (count) => {
             if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M`;
             if (count >= 1000) return `${(count / 1000).toFixed(0)}K`;
             return count?.toString() || '0';
         };
 
         // Get company info and rating
-        const companyName = actor.username || 'Apify';
-        const companyLogo = actor.userAvatar || 'https://apify.com/img/apify-logo/logomark-32x32.svg';
+        const companyName = actor.username || 'Unknown User';
+        const companyLogo = actor.userPictureUrl || actor.userAvatar || actor.avatar || 'assets/images/placeholder-user.jpg';
         const rating = actor.stats?.avgRating || (4.0 + Math.random() * 1.0);
-        const runCount = actor.stats?.totalRuns || Math.floor(Math.random() * 200000);
+        const userCount = actor.stats?.totalUsers || Math.floor(Math.random() * 200000);
         const description = actor.description || actor.title;
 
-        const iconHtml = actor.icon ? 
-            `<img src="${actor.icon}" alt="${actor.title}" class="actor-icon">` :
+        // Debug logging - show complete actor object structure
+        console.log('Full actor object:', actor);
+        console.log('Actor image fields:', {
+            title: actor.title,
+            pictureUrl: actor.pictureUrl,
+            userPictureUrl: actor.userPictureUrl,
+            icon: actor.icon,
+            avatar: actor.avatar,
+            userAvatar: actor.userAvatar,
+            image: actor.image,
+            logo: actor.logo,
+            username: actor.username
+        });
+
+        const iconHtml = actor.pictureUrl || actor.icon ? 
+            `<img src="${actor.pictureUrl || actor.icon}" alt="${actor.title}" class="actor-icon">` :
             `<img src="assets/images/placeholder.svg" alt="${actor.title}" class="actor-icon">`;
 
         actorCard.innerHTML = `
@@ -274,7 +313,13 @@ function renderActorsGrid() {
                     <span class="company-name">${companyName}</span>
                 </div>
                 <div class="actor-card-stats">
-                    <span class="run-count">${formatRunCount(runCount)}</span>
+                    <span class="run-count">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                            <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                        ${formatUserCount(userCount)}
+                    </span>
                     <span class="rating">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M12 2l3.09 6.26 6.91 1-5 4.87 1.18 6.87-6.18-3.25-6.18 3.25 1.18-6.87-5-4.87 6.91-1z"/>
@@ -317,7 +362,7 @@ async function openActorModal() {
 function closeActorModal() {
     elements.actorModalOverlay.classList.remove('active');
     elements.actorSearch.value = '';
-    filteredActors = [...ACTORS_DATA];
+    filteredActors = [];
     searchResults = [];
     isUsingSearch = false;
 }
@@ -347,18 +392,6 @@ function removeActor(actorId) {
     updateServerConfig();
 }
 
-function filterActors(query) {
-    if (!query) {
-        filteredActors = [...ACTORS_DATA];
-    } else {
-        filteredActors = ACTORS_DATA.filter(actor =>
-            actor.title.toLowerCase().includes(query.toLowerCase()) ||
-            actor.path.toLowerCase().includes(query.toLowerCase()) ||
-            actor.description.toLowerCase().includes(query.toLowerCase())
-        );
-    }
-    renderActorsGrid();
-}
 
 // Tool management
 function toggleTool(toolId) {
