@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Apify MCP Dashboard</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="assets/css/styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -18,39 +18,17 @@
                 <h2>Apify MCP</h2>
             </div>
 
-            <div class="sidebar-actions">
-                <button class="btn btn-primary create-server-btn" id="createServerBtn">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"/>
-                        <path d="M12 8v8m-4-4h8"/>
-                    </svg>
-                    Create new MCP server
-                </button>
-            </div>
-
-            <nav class="sidebar-nav" id="serverList">
-                <!-- Server list will be populated by JavaScript -->
-            </nav>
-
-            <div class="sidebar-footer">
-                <button class="btn btn-outline gallery-btn" id="galleryBtn">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-                        <polyline points="15,3 21,3 21,9"/>
-                        <line x1="10" y1="14" x2="21" y2="3"/>
-                    </svg>
-                    <div class="gallery-text">
-                        <span class="gallery-title">Browse Gallery</span>
-                        <span class="gallery-subtitle">Pre-made templates & examples</span>
-                    </div>
-                </button>
+            <div class="sidebar-content">
+                <h3>MCP Server Configuration</h3>
+                <p class="sidebar-description">Configure your Apify MCP server with actors and tools.</p>
             </div>
         </aside>
 
         <!-- Main Content -->
         <main class="main-content">
-            <div class="main-header" id="mainHeader">
-                <h1 id="serverTitle">Select a Server</h1>
+            <div class="main-header">
+                <h1>Apify MCP Server Configuration</h1>
+                <p class="main-description">Configure actors and tools for your MCP server, then get your connection details.</p>
                 <div class="tabs" id="tabsContainer">
                     <button class="tab-button active" data-tab="configuration">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -66,150 +44,121 @@
                         </svg>
                         Connections
                     </button>
-                    <button class="tab-button" data-tab="usage">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M3 3v18h18"/>
-                            <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/>
-                        </svg>
-                        Usage
-                    </button>
                 </div>
             </div>
 
-            <div class="main-body" id="mainBody">
+            <div class="main-body">
                 <!-- Configuration Tab -->
                 <div class="tab-content active" id="configuration">
-                    <!-- Actors Section -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">Actors</h3>
-                            <p class="card-description">Select the Apify Actors this MCP server can use.</p>
-                        </div>
-                        <div class="card-content">
-                            <div class="selected-actors" id="selectedActors">
-                                <div class="empty-state">
-                                    <p>No Actors selected.</p>
+                    <div class="content-grid">
+                        <!-- Actors Section -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Actors</h3>
+                                <p class="card-description">Select the Apify Actors this MCP server can use.</p>
+                            </div>
+                            <div class="card-content">
+                                <div class="selected-actors" id="selectedActors">
+                                    <div class="empty-state">
+                                        <p>No Actors selected.</p>
+                                    </div>
+                                </div>
+                                <button class="btn btn-outline add-actors-btn" id="addActorsBtn">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <path d="M12 8v8m-4-4h8"/>
+                                    </svg>
+                                    Add or remove Actors
+                                </button>
+                                <div class="dynamic-actors-option">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="enableDynamicActors" checked>
+                                        <span class="checkbox-custom"></span>
+                                        <div class="checkbox-content">
+                                            <span class="checkbox-title">Enable dynamic Actor addition</span>
+                                            <p class="checkbox-description">Allow this server to search and add new Actors on-the-fly from the Apify Store.</p>
+                                        </div>
+                                    </label>
                                 </div>
                             </div>
-                            <button class="btn btn-outline add-actors-btn" id="addActorsBtn">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <circle cx="12" cy="12" r="10"/>
-                                    <path d="M12 8v8m-4-4h8"/>
-                                </svg>
-                                Add or remove Actors
-                            </button>
-                            <div class="dynamic-actors-option">
-                                <label class="checkbox-label">
-                                    <input type="checkbox" id="enableDynamicActors" checked>
-                                    <span class="checkbox-custom"></span>
-                                    <div class="checkbox-content">
-                                        <span class="checkbox-title">Enable dynamic Actor addition</span>
-                                        <p class="checkbox-description">Allow this server to search and add new Actors on-the-fly from the Apify Store.</p>
-                                    </div>
-                                </label>
-                            </div>
                         </div>
-                    </div>
 
-                    <!-- Tools Section -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">Tools</h3>
-                            <p class="card-description">Additional tools this MCP server can provide.</p>
-                        </div>
-                        <div class="card-content">
-                            <div class="tools-grid" id="toolsGrid">
-                                <!-- Tools will be populated by JavaScript -->
+                        <!-- Tools Section -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Tools</h3>
+                                <p class="card-description">Additional tools this MCP server can provide.</p>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- Prompts Section -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">Prompts</h3>
-                            <p class="card-description">Pre-made prompts to help users interact with this server.</p>
-                        </div>
-                        <div class="card-content" id="promptsContent">
-                            <!-- Prompts will be populated by JavaScript -->
+                            <div class="card-content">
+                                <div class="tools-grid" id="toolsGrid">
+                                    <!-- Tools will be populated by JavaScript -->
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Connections Tab -->
                 <div class="tab-content" id="connections">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">MCP Server URL</h3>
-                            <p class="card-description">Your unique MCP server endpoint for external integrations and API access.</p>
-                        </div>
-                        <div class="card-content">
-                            <div class="config-section">
-                                <h4>Server Endpoint</h4>
-                                <div class="code-block-container">
-                                    <div class="code-block" id="serverUrl">
-                                        <!-- URL will be generated by JavaScript -->
+                    <div class="content-grid">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">MCP Server URL</h3>
+                                <p class="card-description">Your unique MCP server endpoint for external integrations and API access.</p>
+                            </div>
+                            <div class="card-content">
+                                <div class="config-section">
+                                    <h4>Server Endpoint</h4>
+                                    <div class="code-block-container">
+                                        <div class="code-block" id="serverUrl">
+                                            <!-- URL will be generated by JavaScript -->
+                                        </div>
+                                        <button class="btn btn-outline copy-btn" onclick="copyToClipboard('serverUrl')">Copy</button>
                                     </div>
-                                    <button class="btn btn-outline copy-btn" onclick="copyToClipboard('serverUrl')">Copy</button>
+                                </div>
+                                <div class="text-sm text-muted-foreground">
+                                    <p>This URL can be used to access your MCP server remotely or integrate it with external services.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">MCP Server JSON Configuration</h3>
+                                <p class="card-description">Add this configuration to your MCP client (Claude Desktop, etc.) to use this server.</p>
+                            </div>
+                            <div class="card-content">
+                                <div class="config-section">
+                                    <h4>Configuration JSON</h4>
+                                    <div class="code-block-container">
+                                        <pre class="code-block" id="serverConfig">
+                                            <!-- Config will be generated by JavaScript -->
+                                        </pre>
+                                        <button class="btn btn-outline copy-btn" onclick="copyToClipboard('serverConfig')">Copy</button>
+                                    </div>
+                                </div>
+                                
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="useToken">
+                                    <span class="checkbox-custom"></span>
+                                    <span class="checkbox-title">Use token authentication (includes APIFY_TOKEN environment variable)</span>
+                                </label>
+
+                                <div class="text-sm text-muted-foreground">
+                                    <p class="mb-2">
+                                        <strong>Authentication:</strong> By default, OAuth authentication is used. 
+                                        <span id="authDescription">No token configuration needed - OAuth will be used automatically.</span>
+                                    </p>
+                                    <p>
+                                        For detailed setup instructions, visit the 
+                                        <a href="https://mcp.apify.com" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">
+                                            Apify MCP documentation
+                                        </a>.
+                                    </p>
                                 </div>
                             </div>
                         </div>
                     </div>
-
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">MCP Server JSON Configuration</h3>
-                            <p class="card-description">Add this configuration to your MCP client (Claude Desktop, etc.) to use this server.</p>
-                        </div>
-                        <div class="card-content">
-                            <div class="config-section">
-                                <h4>Configuration JSON</h4>
-                                <div class="code-block-container">
-                                    <pre class="code-block" id="serverConfig">
-                                        <!-- Config will be generated by JavaScript -->
-                                    </pre>
-                                    <button class="btn btn-outline copy-btn" onclick="copyToClipboard('serverConfig')">Copy</button>
-                                </div>
-                            </div>
-                            <label class="checkbox-label">
-                                <input type="checkbox" id="useToken">
-                                <span class="checkbox-custom"></span>
-                                <span class="checkbox-title">Use token authentication (includes APIFY_TOKEN environment variable)</span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Usage Tab -->
-                <div class="tab-content" id="usage">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">Usage Dashboard</h3>
-                            <p class="card-description">Track tool usage and sessions for your MCP server.</p>
-                        </div>
-                        <div class="card-content" id="usageContent">
-                            <!-- Usage data will be populated by JavaScript -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Empty State -->
-                <div class="empty-server-state" id="emptyState">
-                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect width="20" height="8" x="2" y="2" rx="2" ry="2"/>
-                        <rect width="20" height="8" x="2" y="14" rx="2" ry="2"/>
-                        <line x1="6" y1="6" x2="6.01" y2="6"/>
-                        <line x1="6" y1="18" x2="6.01" y2="18"/>
-                    </svg>
-                    <h3>No Server Selected</h3>
-                    <p>Select a server from the list or create a new one to get started.</p>
-                    <button class="btn btn-primary" onclick="createNewServer()">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="10"/>
-                            <path d="M12 8v8m-4-4h8"/>
-                        </svg>
-                        Create Server
-                    </button>
                 </div>
             </div>
         </main>
@@ -246,7 +195,8 @@
         </div>
     </div>
 
-    <script src="data.js"></script>
-    <script src="app.js"></script>
+    <script src="assets/js/data.js"></script>
+    <script src="assets/js/search.js"></script>
+    <script src="assets/js/app.js"></script>
 </body>
 </html>

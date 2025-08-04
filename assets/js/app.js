@@ -1,0 +1,451 @@
+// Global state
+let selectedActors = [];
+let selectedTools = [];
+let enableDynamicActors = true;
+let useToken = false;
+let modalSelection = [];
+let filteredActors = [...ACTORS_DATA];
+let searchResults = [];
+let isUsingSearch = false;
+let activeTab = "configuration";
+
+// DOM Elements
+const elements = {
+    selectedActors: document.getElementById('selectedActors'),
+    toolsGrid: document.getElementById('toolsGrid'),
+    serverUrl: document.getElementById('serverUrl'),
+    serverConfig: document.getElementById('serverConfig'),
+    actorModalOverlay: document.getElementById('actorModalOverlay'),
+    actorsGrid: document.getElementById('actorsGrid'),
+    actorSearch: document.getElementById('actorSearch'),
+    enableDynamicActors: document.getElementById('enableDynamicActors'),
+    useToken: document.getElementById('useToken')
+};
+
+// Initialize the app
+function init() {
+    setupEventListeners();
+    renderSelectedActors();
+    renderToolsGrid();
+    updateServerConfig();
+    // Note: renderActorsGrid() is not called here since modal will load data when opened
+}
+
+// Event Listeners
+function setupEventListeners() {
+    // Add actors button
+    document.getElementById('addActorsBtn').addEventListener('click', openActorModal);
+    
+    // Tab buttons
+    document.querySelectorAll('.tab-button').forEach(button => {
+        button.addEventListener('click', (e) => {
+            const tab = e.currentTarget.dataset.tab;
+            switchTab(tab);
+        });
+    });
+    
+    // Actor search with debouncing
+    elements.actorSearch.addEventListener('input', (e) => {
+        const query = e.target.value.trim();
+        
+        if (query.length === 0) {
+            // Reset to local data when search is empty
+            isUsingSearch = false;
+            filteredActors = [...ACTORS_DATA];
+            renderActorsGrid();
+        } else if (query.length >= 2) {
+            // Use real search for queries with 2+ characters
+            isUsingSearch = true;
+            showSearchLoading();
+            
+            window.apifySearch.debouncedSearch(query, (results) => {
+                if (results.error) {
+                    showSearchError(results.error);
+                } else {
+                    searchResults = results.items;
+                    renderActorsGrid();
+                }
+            });
+        } else {
+            // Show local filtered results for single character
+            isUsingSearch = false;
+            filterActors(query);
+        }
+    });
+    
+    // Dynamic actors checkbox
+    elements.enableDynamicActors.addEventListener('change', (e) => {
+        enableDynamicActors = e.target.checked;
+        updateServerConfig();
+    });
+    
+    // Use token checkbox
+    elements.useToken.addEventListener('change', (e) => {
+        useToken = e.target.checked;
+        updateServerConfig();
+        updateAuthDescription();
+    });
+    
+    // Close modal when clicking overlay
+    elements.actorModalOverlay.addEventListener('click', (e) => {
+        if (e.target === elements.actorModalOverlay) {
+            closeActorModal();
+        }
+    });
+}
+
+// Rendering functions
+function renderSelectedActors() {
+    if (selectedActors.length === 0) {
+        elements.selectedActors.innerHTML = `
+            <div class="empty-state">
+                <p>No Actors selected.</p>
+            </div>
+        `;
+        return;
+    }
+    
+    elements.selectedActors.innerHTML = '';
+    elements.selectedActors.className = 'selected-actors';
+    
+    selectedActors.forEach(actor => {
+        const actorCard = document.createElement('div');
+        actorCard.className = 'selected-actor-card';
+        
+        actorCard.innerHTML = `
+            <button class="btn btn-ghost btn-icon remove-actor-btn" onclick="removeActor('${actor.id}')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 6L6 18M6 6l12 12"/>
+                </svg>
+                <span class="sr-only">Remove Actor</span>
+            </button>
+            <div class="selected-actor-content">
+                <img src="${actor.icon || 'assets/images/placeholder.svg'}" alt="${actor.title}" class="selected-actor-icon">
+                <div class="selected-actor-info">
+                    <p class="selected-actor-title">${actor.title}</p>
+                    <p class="selected-actor-path">${actor.path}</p>
+                </div>
+            </div>
+        `;
+        
+        elements.selectedActors.appendChild(actorCard);
+    });
+}
+
+function renderToolsGrid() {
+    elements.toolsGrid.innerHTML = '';
+    
+    const optionalTools = TOOLS_DATA.filter(tool => tool.category === 'optional');
+    
+    optionalTools.forEach(tool => {
+        const isSelected = selectedTools.includes(tool.id);
+        
+        const toolCard = document.createElement('div');
+        toolCard.className = `tool-card ${isSelected ? 'selected' : ''}`;
+        toolCard.onclick = () => toggleTool(tool.id);
+        
+        toolCard.innerHTML = `
+            <div class="tool-card-header">
+                <div class="tool-icon">${tool.name.charAt(0).toUpperCase()}</div>
+                <div class="tool-title">${tool.name}</div>
+            </div>
+            <div class="tool-description">${tool.description}</div>
+        `;
+        
+        elements.toolsGrid.appendChild(toolCard);
+    });
+}
+
+function renderActorsGrid() {
+    console.log('renderActorsGrid called');
+    console.log('isUsingSearch:', isUsingSearch);
+    console.log('searchResults:', searchResults);
+    console.log('filteredActors:', filteredActors);
+    
+    elements.actorsGrid.innerHTML = '';
+    
+    const actorsToRender = isUsingSearch ? searchResults : filteredActors;
+    console.log('actorsToRender:', actorsToRender.length, 'items');
+    
+    if (actorsToRender.length === 0) {
+        console.log('Showing empty state');
+        const emptyState = document.createElement('div');
+        emptyState.className = 'empty-search-state';
+        emptyState.innerHTML = `
+            <p>${isUsingSearch ? 'No Actors found matching your search.' : 'No Actors available.'}</p>
+            ${isUsingSearch ? '<p class="text-sm text-muted-foreground">Try different keywords or check your spelling.</p>' : ''}
+        `;
+        elements.actorsGrid.appendChild(emptyState);
+        return;
+    }
+    
+    actorsToRender.forEach(actor => {
+        const isSelected = modalSelection.some(a => a.id === actor.id);
+        
+        const actorCard = document.createElement('div');
+        actorCard.className = `actor-modal-card ${isSelected ? 'selected' : ''}`;
+        actorCard.onclick = () => toggleActorSelection(actor);
+        
+        // Format run count similar to Apify Store
+        const formatRunCount = (count) => {
+            if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M`;
+            if (count >= 1000) return `${(count / 1000).toFixed(0)}K`;
+            return count?.toString() || '0';
+        };
+
+        const iconHtml = actor.icon ? 
+            `<img src="${actor.icon}" alt="${actor.title}">` :
+            `<img src="assets/images/placeholder.svg" alt="${actor.title}">`;
+
+        actorCard.innerHTML = `
+            <div class="actor-card-icon">
+                ${iconHtml}
+            </div>
+            <div class="actor-card-info">
+                <h4 class="actor-card-title">${actor.title}</h4>
+                <p class="actor-card-path">${actor.path}</p>
+                <div class="actor-card-stats">
+                    <span class="run-count">${formatRunCount(actor.stats?.totalRuns)} runs</span>
+                </div>
+            </div>
+        `;
+        
+        elements.actorsGrid.appendChild(actorCard);
+    });
+}
+
+// Actor management
+async function openActorModal() {
+    modalSelection = [...selectedActors];
+    elements.actorModalOverlay.classList.add('active');
+    
+    // Load popular actors by default (search for "web" to get relevant results)
+    showSearchLoading();
+    try {
+        const results = await window.apifySearch.searchActors('web', 20);
+        console.log('Modal got results:', results);
+        if (results.items && results.items.length > 0) {
+            searchResults = results.items;
+            isUsingSearch = true;
+            console.log('About to render grid with:', searchResults.length, 'items');
+            renderActorsGrid();
+        } else {
+            console.log('No items found, showing empty state');
+            showEmptyState();
+        }
+    } catch (error) {
+        console.error('Modal error:', error);
+        showSearchError('Failed to load actors');
+    }
+}
+
+function closeActorModal() {
+    elements.actorModalOverlay.classList.remove('active');
+    elements.actorSearch.value = '';
+    filteredActors = [...ACTORS_DATA];
+    searchResults = [];
+    isUsingSearch = false;
+}
+
+function toggleActorSelection(actor) {
+    const isSelected = modalSelection.some(a => a.id === actor.id);
+    
+    if (isSelected) {
+        modalSelection = modalSelection.filter(a => a.id !== actor.id);
+    } else {
+        modalSelection.push(actor);
+    }
+    
+    renderActorsGrid();
+}
+
+function saveActorSelection() {
+    selectedActors = [...modalSelection];
+    renderSelectedActors();
+    updateServerConfig();
+    closeActorModal();
+}
+
+function removeActor(actorId) {
+    selectedActors = selectedActors.filter(a => a.id !== actorId);
+    renderSelectedActors();
+    updateServerConfig();
+}
+
+function filterActors(query) {
+    if (!query) {
+        filteredActors = [...ACTORS_DATA];
+    } else {
+        filteredActors = ACTORS_DATA.filter(actor =>
+            actor.title.toLowerCase().includes(query.toLowerCase()) ||
+            actor.path.toLowerCase().includes(query.toLowerCase()) ||
+            actor.description.toLowerCase().includes(query.toLowerCase())
+        );
+    }
+    renderActorsGrid();
+}
+
+// Tool management
+function toggleTool(toolId) {
+    const isSelected = selectedTools.includes(toolId);
+    
+    if (isSelected) {
+        selectedTools = selectedTools.filter(id => id !== toolId);
+    } else {
+        selectedTools.push(toolId);
+    }
+    
+    renderToolsGrid();
+    updateServerConfig();
+}
+
+// Configuration generation
+function generateServerConfig() {
+    const serverName = "Apify-mcp-server";
+    
+    const toolMapping = {
+        tool_apify_docs: "docs",
+        tool_actor_runs: "runs",
+        tool_apify_storage: "storage",
+    };
+    
+    const mappedTools = selectedTools
+        .map(toolId => toolMapping[toolId])
+        .filter((tool, index, arr) => tool && arr.indexOf(tool) === index);
+    
+    const toolsArg = mappedTools.length > 0 ? `--tools=${mappedTools.join(",")}` : "";
+    const actorsArg = selectedActors.length > 0 ? `--actors=${selectedActors.map((a) => a.path).join(",")}` : "";
+    
+    const additionalArgs = [actorsArg, toolsArg].filter((arg) => arg !== "");
+    const args = ["-y", "@apify/actors-mcp-server", ...additionalArgs];
+    
+    const config = {
+        mcpServers: {
+            [serverName]: {
+                command: "npx",
+                args: args,
+                ...(useToken && {
+                    env: {
+                        APIFY_TOKEN: "YOUR_APIFY_TOKEN",
+                    },
+                }),
+            },
+        },
+    };
+    
+    return JSON.stringify(config, null, 2);
+}
+
+function generateMcpUrl() {
+    const baseUrl = "https://mcp.apify.com/";
+    const params = new URLSearchParams();
+    
+    if (enableDynamicActors === false) {
+        params.append("enableAddingActors", "false");
+    }
+    
+    if (selectedActors.length > 0) {
+        const actorPaths = selectedActors.map((actor) => actor.path).join(",");
+        params.append("actors", actorPaths);
+    }
+    
+    if (selectedTools.length > 0) {
+        const toolMapping = {
+            tool_apify_docs: "docs",
+            tool_actor_runs: "runs",
+            tool_apify_storage: "storage",
+        };
+        
+        const mappedTools = selectedTools
+            .map((toolId) => toolMapping[toolId])
+            .filter((tool, index, arr) => tool && arr.indexOf(tool) === index);
+        
+        if (mappedTools.length > 0) {
+            params.append("tools", mappedTools.join(","));
+        }
+    }
+    
+    const queryString = params.toString();
+    return queryString ? `${baseUrl}?${queryString}` : baseUrl;
+}
+
+function updateServerConfig() {
+    elements.serverConfig.textContent = generateServerConfig();
+    elements.serverUrl.textContent = generateMcpUrl();
+}
+
+// Utility functions
+function copyToClipboard(elementId) {
+    const element = document.getElementById(elementId);
+    const text = element.textContent || element.innerText;
+    
+    navigator.clipboard.writeText(text).then(() => {
+        // Show a temporary success message
+        const button = element.parentNode.querySelector('.copy-btn');
+        const originalText = button.textContent;
+        button.textContent = 'Copied!';
+        setTimeout(() => {
+            button.textContent = originalText;
+        }, 2000);
+    }).catch(err => {
+        console.error('Failed to copy: ', err);
+    });
+}
+
+// Tab management
+function switchTab(tabName) {
+    activeTab = tabName;
+    
+    // Update tab buttons
+    document.querySelectorAll('.tab-button').forEach(button => {
+        button.classList.toggle('active', button.dataset.tab === tabName);
+    });
+    
+    // Update tab content
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.toggle('active', content.id === tabName);
+    });
+}
+
+// Update authentication description
+function updateAuthDescription() {
+    const authDescription = document.getElementById('authDescription');
+    if (authDescription) {
+        if (useToken) {
+            authDescription.textContent = 'Replace YOUR_APIFY_TOKEN with your actual Apify API token.';
+        } else {
+            authDescription.textContent = 'No token configuration needed - OAuth will be used automatically.';
+        }
+    }
+}
+
+// Search UI helpers
+function showSearchLoading() {
+    elements.actorsGrid.innerHTML = `
+        <div class="search-loading">
+            <div class="loading-spinner"></div>
+            <p>Searching Apify Store...</p>
+        </div>
+    `;
+}
+
+function showSearchError(error) {
+    elements.actorsGrid.innerHTML = `
+        <div class="search-error">
+            <p>Search failed: ${error}</p>
+            <p class="text-sm text-muted-foreground">Please try again or check your connection.</p>
+        </div>
+    `;
+}
+
+function showEmptyState() {
+    elements.actorsGrid.innerHTML = `
+        <div class="empty-search-state">
+            <p>No Actors found.</p>
+            <p class="text-sm text-muted-foreground">Try searching for specific functionality like "web", "scraper", or "email".</p>
+        </div>
+    `;
+}
+
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', init);
