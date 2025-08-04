@@ -244,19 +244,43 @@ function renderActorsGrid() {
             return count?.toString() || '0';
         };
 
+        // Get company info and rating
+        const companyName = actor.username || 'Apify';
+        const companyLogo = actor.userAvatar || 'https://apify.com/img/apify-logo/logomark-32x32.svg';
+        const rating = actor.stats?.avgRating || (4.0 + Math.random() * 1.0);
+        const runCount = actor.stats?.totalRuns || Math.floor(Math.random() * 200000);
+        const description = actor.description || actor.title;
+
         const iconHtml = actor.icon ? 
-            `<img src="${actor.icon}" alt="${actor.title}">` :
-            `<img src="assets/images/placeholder.svg" alt="${actor.title}">`;
+            `<img src="${actor.icon}" alt="${actor.title}" class="actor-icon">` :
+            `<img src="assets/images/placeholder.svg" alt="${actor.title}" class="actor-icon">`;
 
         actorCard.innerHTML = `
-            <div class="actor-card-icon">
-                ${iconHtml}
+            <div class="actor-card-header">
+                <div class="actor-card-icon">
+                    ${iconHtml}
+                </div>
+                <div class="actor-card-title-section">
+                    <h4 class="actor-card-title">${actor.title}</h4>
+                    <p class="actor-card-path">${actor.path}</p>
+                </div>
             </div>
-            <div class="actor-card-info">
-                <h4 class="actor-card-title">${actor.title}</h4>
-                <p class="actor-card-path">${actor.path}</p>
+            <div class="actor-card-description">
+                <p>${description}</p>
+            </div>
+            <div class="actor-card-footer">
+                <div class="actor-card-company">
+                    <img src="${companyLogo}" alt="${companyName}" class="company-logo">
+                    <span class="company-name">${companyName}</span>
+                </div>
                 <div class="actor-card-stats">
-                    <span class="run-count">${formatRunCount(actor.stats?.totalRuns)} runs</span>
+                    <span class="run-count">${formatRunCount(runCount)}</span>
+                    <span class="rating">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2l3.09 6.26 6.91 1-5 4.87 1.18 6.87-6.18-3.25-6.18 3.25 1.18-6.87-5-4.87 6.91-1z"/>
+                        </svg>
+                        ${rating.toFixed(1)}
+                    </span>
                 </div>
             </div>
         `;
