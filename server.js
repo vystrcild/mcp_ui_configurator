@@ -27,7 +27,7 @@ app.use(express.static('.'));
 // Search endpoint for Apify store
 app.get('/api/search/actors', async (req, res) => {
     try {
-        const { query, limit = 50, offset = 0 } = req.query;
+        const { query, limit = 50, offset = 0, pricingModel } = req.query;
         
         if (!query || query.trim().length < 2) {
             return res.json({ 
@@ -79,6 +79,7 @@ app.get('/api/search/actors', async (req, res) => {
                 userPictureUrl: actor.userPictureUrl || null,
                 username: actor.username,
                 name: actor.name,
+                pricingModel: actor.currentPricingInfo?.pricingModel,
                 stats: {
                     totalUsers: actor.stats?.totalUsers || 0,
                     lastRunFinishedAt: actor.stats?.lastRunFinishedAt
@@ -106,7 +107,7 @@ app.get('/api/search/actors', async (req, res) => {
 // Popular actors endpoint (no search, sorted by usage/popularity)
 app.get('/api/popular/actors', async (req, res) => {
     try {
-        const { limit = 20, offset = 0 } = req.query;
+        const { limit = 20, offset = 0, pricingModel } = req.query;
 
         // Get popular actors without search parameter, should return by popularity
         const storeParams = new URLSearchParams({
@@ -147,6 +148,7 @@ app.get('/api/popular/actors', async (req, res) => {
                 userPictureUrl: actor.userPictureUrl || null,
                 username: actor.username,
                 name: actor.name,
+                pricingModel: actor.currentPricingInfo?.pricingModel,
                 stats: {
                     totalUsers: actor.stats?.totalUsers || 0,
                     lastRunFinishedAt: actor.stats?.lastRunFinishedAt

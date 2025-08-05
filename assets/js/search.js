@@ -28,11 +28,31 @@ class ApifySearch {
 
             const results = await response.json();
             
-            // Cache results for 5 minutes
-            this.searchCache.set(cacheKey, results);
+            // Debug: Log first few items to see what pricingModel values we're getting
+            console.log('API Response sample:', results.items.slice(0, 3).map(actor => ({
+                title: actor.title,
+                pricingModel: actor.pricingModel
+            })));
+            
+            // Filter results to only include allowed pricing models
+            const allowedPricingModels = ['FREE', 'PRICE_PER_DATASET_ITEM', 'PAY_PER_EVENT'];
+            const filteredResults = {
+                ...results,
+                items: results.items.filter(actor => 
+                    allowedPricingModels.includes(actor.pricingModel)
+                ),
+                count: results.items.filter(actor => 
+                    allowedPricingModels.includes(actor.pricingModel)
+                ).length
+            };
+            
+            console.log(`Filtered ${results.items.length} items down to ${filteredResults.items.length}`);
+            
+            // Cache filtered results for 5 minutes
+            this.searchCache.set(cacheKey, filteredResults);
             setTimeout(() => this.searchCache.delete(cacheKey), 5 * 60 * 1000);
             
-            return results;
+            return filteredResults;
         } catch (error) {
             console.error('Search error:', error);
             return { items: [], total: 0, count: 0, error: error.message };
@@ -98,11 +118,31 @@ class ApifySearch {
 
             const results = await response.json();
             
-            // Cache results for 10 minutes
-            this.searchCache.set(cacheKey, results);
+            // Debug: Log first few items to see what pricingModel values we're getting
+            console.log('Popular API Response sample:', results.items.slice(0, 3).map(actor => ({
+                title: actor.title,
+                pricingModel: actor.pricingModel
+            })));
+            
+            // Filter results to only include allowed pricing models
+            const allowedPricingModels = ['FREE', 'PRICE_PER_DATASET_ITEM', 'PAY_PER_EVENT'];
+            const filteredResults = {
+                ...results,
+                items: results.items.filter(actor => 
+                    allowedPricingModels.includes(actor.pricingModel)
+                ),
+                count: results.items.filter(actor => 
+                    allowedPricingModels.includes(actor.pricingModel)
+                ).length
+            };
+            
+            console.log(`Popular: Filtered ${results.items.length} items down to ${filteredResults.items.length}`);
+            
+            // Cache filtered results for 10 minutes
+            this.searchCache.set(cacheKey, filteredResults);
             setTimeout(() => this.searchCache.delete(cacheKey), 10 * 60 * 1000);
             
-            return results;
+            return filteredResults;
         } catch (error) {
             console.error('Popular actors error:', error);
             return { items: [], total: 0, count: 0, error: error.message };
