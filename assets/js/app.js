@@ -1,28 +1,34 @@
 // Tools data
 const TOOLS_DATA = [
     {
-        id: 'tool_actor_runs',
-        name: 'Actor runs',
-        description: 'Get, list, create, update, and delete Actor runs.',
+        id: 'tool_actor_discovery',
+        name: 'Actor discovery and management',
+        description: 'Search for Actors, view details, and dynamically add them to your server.',
         category: 'default'
     },
     {
         id: 'tool_apify_docs',
         name: 'Apify documentation',
-        description: 'Search through Apify documentation to get answers about web scraping and automation.',
+        description: 'Search Apify documentation and fetch specific documents for development help.',
+        category: 'optional'
+    },
+    {
+        id: 'tool_actor_runs',
+        name: 'Actor runs',
+        description: 'Monitor and manage your Actor executions, view results, and access logs.',
         category: 'optional'
     },
     {
         id: 'tool_apify_storage',
         name: 'Apify storage',
-        description: 'Manage data in Apify storage - datasets, key-value stores, and request queues.',
+        description: 'Access and manage your data stored in Apify\'s datasets and key-value stores.',
         category: 'optional'
     }
 ];
 
 // Global state
 let selectedActors = [];
-let selectedTools = ['tool_actor_runs']; // Actor runs selected by default
+let selectedTools = ['tool_actor_discovery']; // Actor discovery selected by default
 let enableDynamicActors = true;
 let useToken = false;
 let modalSelection = [];

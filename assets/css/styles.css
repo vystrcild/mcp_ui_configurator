@@ -1038,7 +1038,6 @@ body {
 }
 
 .tool-item:has(input[type="checkbox"]:disabled) {
-    opacity: 0.6;
     cursor: not-allowed;
 }
 
@@ -1047,7 +1046,11 @@ body {
     box-shadow: none;
 }
 
-.tool-item:has(input[type="checkbox"]:disabled) .tool-name,
+/* Keep text active/readable for disabled default tools */
+.tool-item:has(input[type="checkbox"]:disabled) .tool-name {
+    color: var(--foreground);
+}
+
 .tool-item:has(input[type="checkbox"]:disabled) .tool-description {
     color: var(--muted-foreground);
 }
@@ -1129,6 +1132,9 @@ body {
 
 .code-block-container {
     position: relative;
+    display: flex;
+    align-items: stretch;
+    gap: 0.5rem;
 }
 
 .code-block {
@@ -1139,16 +1145,19 @@ body {
     font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
     border: 1px solid var(--border);
     overflow-x: auto;
-    word-break: break-all;
+    word-break: break-word;
+    flex: 1;
+    min-width: 0;
 }
 
 .copy-btn {
-    position: absolute;
-    top: 0.5rem;
-    right: 0.5rem;
+    position: static;
     background: transparent;
     padding: 0.25rem 0.5rem;
     font-size: 0.75rem;
+    align-self: flex-start;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 /* Usage Content */
@@ -1567,9 +1576,9 @@ body {
 }
 
 .company-logo {
-    width: 16px;
-    height: 16px;
-    border-radius: 3px;
+    width: 20px;
+    height: 20px;
+    border-radius: 100%;
     object-fit: cover;
 }
 
