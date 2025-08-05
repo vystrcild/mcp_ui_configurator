@@ -484,23 +484,51 @@ function generateMcpUrl() {
 }
 
 function updateServerConfig() {
-    elements.serverConfig.textContent = generateServerConfig();
-    elements.serverUrl.textContent = generateMcpUrl();
+    // Update server config with copy button
+    elements.serverConfig.innerHTML = `${generateServerConfig()}<button class="copy-btn-inline" onclick="copyToClipboard('serverConfig')" title="Copy to clipboard">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+            <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+        </svg>
+    </button>`;
+    
+    // Update server URL with copy button
+    elements.serverUrl.innerHTML = `${generateMcpUrl()}<button class="copy-btn-inline" onclick="copyToClipboard('serverUrl')" title="Copy to clipboard">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+            <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+        </svg>
+    </button>`;
 }
 
 // Utility functions
 function copyToClipboard(elementId) {
     const element = document.getElementById(elementId);
-    const text = element.textContent || element.innerText;
+    const button = element.querySelector('.copy-btn-inline');
+    
+    // Get text content excluding the button
+    let text = '';
+    if (elementId === 'serverConfig') {
+        text = generateServerConfig();
+    } else if (elementId === 'serverUrl') {
+        text = generateMcpUrl();
+    }
     
     navigator.clipboard.writeText(text).then(() => {
         // Show a temporary success message
-        const button = element.parentNode.querySelector('.copy-btn');
-        const originalText = button.textContent;
-        button.textContent = 'Copied!';
-        setTimeout(() => {
-            button.textContent = originalText;
-        }, 2000);
+        if (button) {
+            const originalContent = button.innerHTML;
+            button.innerHTML = `
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="20,6 9,17 4,12"/>
+                </svg>
+            `;
+            button.style.color = 'var(--success)';
+            setTimeout(() => {
+                button.innerHTML = originalContent;
+                button.style.color = '';
+            }, 2000);
+        }
     }).catch(err => {
         console.error('Failed to copy: ', err);
     });
