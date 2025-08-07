@@ -65,3 +65,67 @@ No build process, transpilation, or bundling required.
 
 ## Rules
 - Always use "Actor" with capitalized "A" in text (but not in ids or urls)
+
+## Development Best Practices
+- Never use `npm run dev` and similar because server already running most of the time
+
+## API Requests
+
+### Get List of Actors in Store
+
+#### Request Parameters
+- `limit` (double): Maximum number of elements to return. Default and maximum value is 1,000.
+- `offset` (double): Number of elements to skip at the start. Default is 0.
+- `search` (string): Search string across fields: title, name, description, username, readme.
+- `sortBy` (string): Sort results by: relevance (default), popularity, newest, lastUpdate.
+- `category` (string): Filter results by specified category.
+- `username` (string): Filter results by specified username.
+- `pricingModel` (string): Filter by pricing model. Possible values: 
+  - FREE
+  - FLAT_PRICE_PER_MONTH
+  - PRICE_PER_DATASET_ITEM
+  - PAY_PER_EVENT
+
+#### Response Example
+```json
+{
+  "data": {
+    "total": 100,
+    "offset": 0,
+    "limit": 1000,
+    "desc": false,
+    "count": 1,
+    "items": [
+      {
+        "id": "zdc3Pyhyz3m8vjDeM",
+        "title": "My Public Actor",
+        "name": "my-public-actor",
+        "username": "jane35",
+        "userFullName": "Jane H. Doe",
+        "description": "My public actor!",
+        "categories": [
+          "MARKETING",
+          "LEAD_GENERATION"
+        ],
+        "notice": "string",
+        "pictureUrl": "https://...",
+        "userPictureUrl": "https://...",
+        "url": "https://...",
+        "stats": {
+          "totalBuilds": 9,
+          "totalRuns": 16,
+          "totalUsers": 6,
+          "totalUsers7Days": 2,
+          "totalUsers30Days": 6,
+          "totalUsers90Days": 6,
+          "totalMetamorphs": 2,
+          "lastRunStartedAt": "2019-07-08T14:01:05.546Z"
+        },
+        "currentPricingInfo": {
+          "pricingModel": "FREE"
+        }
+      }
+    ]
+  }
+}
+```

@@ -36,6 +36,7 @@ let filteredActors = [];
 let searchResults = [];
 let isUsingSearch = false;
 let activeTab = "configuration";
+let ratingCache = new Map(); // Cache for stable actor ratings
 
 // DOM Elements
 const elements = {
@@ -278,7 +279,7 @@ function renderActorsGrid() {
         // Get company info and rating
         const companyName = actor.username || 'Unknown User';
         const companyLogo = actor.userPictureUrl || actor.userAvatar || actor.avatar || 'assets/images/placeholder-user.jpg';
-        const rating = actor.stats?.avgRating || (4.0 + Math.random() * 1.0);
+        const rating = getStableRating(actor);
         const userCount = actor.stats?.totalUsers || Math.floor(Math.random() * 200000);
         const description = actor.description || actor.title;
 
@@ -502,6 +503,37 @@ function updateServerConfig() {
 }
 
 // Utility functions
+function getStableRating(actor) {
+    // Check if we already have a cached rating for this actor
+    if (ratingCache.has(actor.id)) {
+        return ratingCache.get(actor.id);
+    }
+    
+    // If actor has real rating data, use it
+    if (actor.stats?.avgRating) {
+        const rating = actor.stats.avgRating;
+        ratingCache.set(actor.id, rating);
+        return rating;
+    }
+    
+    // Generate deterministic fallback rating based on actor ID
+    // This ensures the same actor always gets the same rating
+    let hash = 0;
+    for (let i = 0; i < actor.id.length; i++) {
+        const char = actor.id.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // Convert to 32-bit integer
+    }
+    
+    // Convert hash to a rating between 4.0 and 5.0
+    const normalizedHash = Math.abs(hash) / Math.pow(2, 31);
+    const rating = 4.0 + normalizedHash;
+    
+    // Cache and return the stable rating
+    ratingCache.set(actor.id, rating);
+    return rating;
+}
+
 function copyToClipboard(elementId) {
     const element = document.getElementById(elementId);
     const button = element.querySelector('.copy-btn-inline');
