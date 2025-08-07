@@ -2784,3 +2784,16 @@ body {
 .code-block { background: #161718 !important; }
 .code-block pre[class*="language-"],
 .dark .code-block pre[class*="language-"] { background: #161718 !important; }
+
+/* Tabs: flatten and remove motion to avoid visual jitter */
+.tabs { background: transparent !important; border: none !important; box-shadow: none !important; padding: 0 !important; gap: 1rem !important; }
+.tab-button { background: transparent !important; border-radius: 8px !important; padding: 0.5rem 0.6rem !important; color: var(--muted-foreground) !important; position: relative; border: 1px solid transparent; }
+.tab-button:hover, .tab-button.active { transform: none !important; }
+.tab-button.active { color: var(--primary) !important; background: var(--card-hover) !important; border-color: rgba(30,163,77,0.35) !important; }
+
+/* Ensure Connections tab content uses same max width as Configuration */
+#connections.tab-content {
+    width: 100% !important;
+    max-width: 72rem !important;
+    margin: 0 auto !important;
+}
