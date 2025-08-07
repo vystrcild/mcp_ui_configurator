@@ -740,20 +740,6 @@ window.copyCode = function(button) {
     });
 }
 
-window.switchSDKTab = function(sdk) {
-    // Remove active class from all tabs and panels
-    document.querySelectorAll('.sdk-tab').forEach(tab => {
-        tab.classList.remove('active');
-    });
-    document.querySelectorAll('.sdk-panel').forEach(panel => {
-        panel.classList.remove('active');
-    });
-    
-    // Add active class to selected tab and panel
-    document.querySelector(`.sdk-tab[data-sdk="${sdk}"]`).classList.add('active');
-    document.querySelector(`.sdk-panel[data-sdk-panel="${sdk}"]`).classList.add('active');
-}
-
 window.switchPlatformTab = function(platform) {
     // Remove active class from all tabs and panels
     document.querySelectorAll('.platform-tab').forEach(tab => {
@@ -1295,6 +1281,250 @@ window.showIntegrationDetails = function(integration) {
                         </svg>
                     </button>
                     </div>
+                </div>
+            `
+        },
+        'python-sdk': {
+            title: 'Python SDK',
+            content: `
+                <div class="integration-step">
+                    <p>Integrate Apify MCP into your Python applications using the official MCP SDK.</p>
+                </div>
+                
+                <div class="integration-step">
+                    <h4>Installation</h4>
+                    <div class="code-block">
+                        <pre><code class="language-bash">pip install "mcp[cli]"</code></pre>
+                        <button class="copy-code-btn" onclick="copyCode(this)">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="integration-step">
+                    <h4>Example Usage</h4>
+                    <div class="code-block">
+                        <pre><code class="language-python">import mcp
+from mcp.client.streamable_http import streamablehttp_client
+
+async def main():
+    url = "${document.getElementById('mcpServerUrl').textContent}"
+    async with streamablehttp_client(url) as (read_stream, write_stream):
+        async with mcp.ClientSession(read_stream, write_stream) as session:
+            await session.initialize()
+            tools_result = await session.list_tools()
+            print("Available tools:", [t.name for t in tools_result.tools])</code></pre>
+                        <button class="copy-code-btn" onclick="copyCode(this)">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="integration-step">
+                    <h4>Authentication</h4>
+                    <p>Pass your API key in the Authorization header when connecting to the MCP server:</p>
+                    <div class="code-block">
+                        <pre><code class="language-python">headers = {
+    "Authorization": "Bearer ${useToken.checked ? 'YOUR_APIFY_TOKEN' : 'YOUR_API_KEY'}"
+}
+# Pass headers to your HTTP client configuration</code></pre>
+                        <button class="copy-code-btn" onclick="copyCode(this)">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            `
+        },
+        'typescript-sdk': {
+            title: 'TypeScript SDK',
+            content: `
+                <div class="integration-step">
+                    <p>Integrate Apify MCP into your TypeScript/JavaScript applications using the official MCP SDK.</p>
+                </div>
+                
+                <div class="integration-step">
+                    <h4>Installation</h4>
+                    <div class="code-block">
+                        <pre><code class="language-bash">npm install @modelcontextprotocol/sdk</code></pre>
+                        <button class="copy-code-btn" onclick="copyCode(this)">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="integration-step">
+                    <h4>Example Usage</h4>
+                    <div class="code-block">
+                        <pre><code class="language-typescript">import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk";
+
+const serverUrl = "${document.getElementById('mcpServerUrl').textContent}";
+const transport = new StreamableHTTPClientTransport(serverUrl, {
+    headers: {
+        "Authorization": "Bearer ${useToken.checked ? 'YOUR_APIFY_TOKEN' : 'YOUR_API_KEY'}"
+    }
+});
+
+const client = new Client({
+    name: "My App",
+    version: "1.0.0"
+});
+
+await client.connect(transport);
+const tools = await client.listTools();
+console.log("Available tools:", tools.map(t => t.name));</code></pre>
+                        <button class="copy-code-btn" onclick="copyCode(this)">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="integration-step">
+                    <h4>Authentication</h4>
+                    <p>Include your API key in the Authorization header when creating the transport:</p>
+                    <div class="code-block">
+                        <pre><code class="language-typescript">const transport = new StreamableHTTPClientTransport(serverUrl, {
+    headers: {
+        "Authorization": "Bearer ${useToken.checked ? 'YOUR_APIFY_TOKEN' : 'YOUR_API_KEY'}"
+    }
+});</code></pre>
+                        <button class="copy-code-btn" onclick="copyCode(this)">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            `
+        },
+        'json-config': {
+            title: 'JSON Configuration',
+            content: `
+                <div class="integration-step">
+                    <p>Use JSON configuration to integrate Apify MCP with various MCP-compatible clients and tools.</p>
+                </div>
+                
+                <div class="platform-tabs">
+                    <button class="platform-tab active" data-platform="mac" onclick="switchPlatformTab('mac')">Mac/Linux</button>
+                    <button class="platform-tab" data-platform="windows" onclick="switchPlatformTab('windows')">Windows</button>
+                    <button class="platform-tab" data-platform="wsl" onclick="switchPlatformTab('wsl')">WSL</button>
+                </div>
+                
+                <div class="platform-content">
+                    <!-- Mac/Linux Config -->
+                    <div class="platform-panel active" data-platform-panel="mac">
+                        <h4>JSON Configuration for Mac/Linux</h4>
+                        <div class="code-block">
+                            <pre><code class="language-json">{
+  "mcpServers": {
+    "apify": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@apify/mcp-server",
+        "run",
+        "@apify/mcp-server",
+        "--profile",
+        "default"
+      ]${useToken.checked ? ',\n      "env": {\n        "APIFY_TOKEN": "YOUR_APIFY_TOKEN"\n      }' : ''}
+    }
+  }
+}</code></pre>
+                            <button class="copy-code-btn" onclick="copyCode(this)">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Windows Config -->
+                    <div class="platform-panel" data-platform-panel="windows">
+                        <h4>JSON Configuration for Windows</h4>
+                        <div class="code-block">
+                            <pre><code class="language-json">{
+  "mcpServers": {
+    "apify": {
+      "command": "cmd",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "@apify/mcp-server",
+        "run",
+        "@apify/mcp-server",
+        "--profile",
+        "default"
+      ]${useToken.checked ? ',\n      "env": {\n        "APIFY_TOKEN": "YOUR_APIFY_TOKEN"\n      }' : ''}
+    }
+  }
+}</code></pre>
+                            <button class="copy-code-btn" onclick="copyCode(this)">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- WSL Config -->
+                    <div class="platform-panel" data-platform-panel="wsl">
+                        <h4>JSON Configuration for WSL</h4>
+                        <div class="code-block">
+                            <pre><code class="language-json">{
+  "mcpServers": {
+    "apify": {
+      "command": "wsl",
+      "args": [
+        "npx",
+        "-y",
+        "@apify/mcp-server",
+        "run",
+        "@apify/mcp-server",
+        "--profile",
+        "default"
+      ]${useToken.checked ? ',\n      "env": {\n        "APIFY_TOKEN": "YOUR_APIFY_TOKEN"\n      }' : ''}
+    }
+  }
+}</code></pre>
+                            <button class="copy-code-btn" onclick="copyCode(this)">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="integration-step">
+                    <h4>Using with MCP Clients</h4>
+                    <p>This JSON configuration can be used with any MCP-compatible client. Simply copy the configuration above and paste it into your client's MCP settings.</p>
+                    <p>Common MCP clients include:</p>
+                    <ul style="margin-left: 1.5rem; list-style: disc;">
+                        <li>Claude Desktop</li>
+                        <li>Cursor IDE</li>
+                        <li>VS Code with MCP extension</li>
+                        <li>Other MCP-compatible tools</li>
+                    </ul>
                 </div>
             `
         }

@@ -2437,62 +2437,7 @@ body {
     color: var(--primary);
 }
 
-/* SDK Tabs */
-.sdk-tabs {
-    display: flex;
-    gap: 0.5rem;
-    margin-bottom: 1.5rem;
-    border-bottom: 1px solid var(--border);
-}
-
-.sdk-tab {
-    padding: 0.75rem 1.5rem;
-    background: transparent;
-    border: none;
-    border-bottom: 2px solid transparent;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--muted-foreground);
-    cursor: pointer;
-    transition: all 0.2s ease;
-    margin-bottom: -1px;
-}
-
-.sdk-tab:hover {
-    color: var(--foreground);
-}
-
-.sdk-tab.active {
-    color: var(--primary);
-    border-bottom-color: var(--primary);
-}
-
-.sdk-content {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1rem;
-    width: 100%;
-    box-sizing: border-box;
-    overflow: hidden;
-}
-
-.sdk-panel {
-    display: none;
-}
-
-.sdk-panel.active {
-    display: block;
-}
-
-.sdk-panel h4 {
-    font-size: 0.9375rem;
-    font-weight: 600;
-    color: var(--foreground);
-    margin-bottom: 0.75rem;
-}
-
-/* Platform Tabs */
+/* Platform Tabs (used in JSON Config modal) */
 .platform-tabs {
     display: flex;
     gap: 0.5rem;
@@ -2676,10 +2621,6 @@ body {
     
     .integration-grid {
         grid-template-columns: 1fr;
-    }
-    
-    .sdk-tabs {
-        flex-wrap: wrap;
     }
     
     .platform-tabs {
