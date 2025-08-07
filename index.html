@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,8 +10,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Prism.js for syntax highlighting -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet" />
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/toolbar/prism-toolbar.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet" crossorigin="anonymous" integrity="sha256-ko4j5rn874LF8dHwW29/xabhh8YBleWfvxb8nQce4Fc=">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/toolbar/prism-toolbar.min.css" rel="stylesheet" crossorigin="anonymous" integrity="sha256-jsQbSO1yj62eu6dP6f2fJESRgkHNNEpxrK8NnO6/oyc=">
 </head>
 <body>
     <div class="app">
@@ -45,7 +45,8 @@
         <!-- Main Content -->
         <main class="main-content">
             <div class="main-header">
-                <div class="tabs" id="tabsContainer">
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:1rem;">
+                    <div class="tabs" id="tabsContainer">
                     <button class="tab-button active" data-tab="configuration">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
@@ -60,6 +61,7 @@
                         </svg>
                         Connections
                     </button>
+                    </div>
                 </div>
             </div>
 
@@ -116,142 +118,133 @@
 
                 <!-- Connections Tab -->
                 <div class="tab-content" id="connections">
-                    <div class="connections-container">
-                        <!-- MCP Server URL Section -->
-                        <div class="connection-section">
-                            <div class="section-header">
-                                <h2>MCP Server URL</h2>
-                                <p>Your unique MCP server endpoint for integrations</p>
-                            </div>
-                            <div class="url-display">
-                                <div class="url-field">
-                                    <span id="mcpServerUrl">https://mcp.apify.com/</span>
-                                    <button class="copy-btn" onclick="copyToClipboard('mcpServerUrl', this)">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-                                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-                                        </svg>
-                                    </button>
-                                </div>
-                                <label class="checkbox-label mt-3">
-                                    <input type="checkbox" id="useToken">
-                                    <span class="checkbox-custom"></span>
-                                    <span class="checkbox-title">Use Apify token for authentication</span>
-                                </label>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">MCP Server URL</h3>
+                            <p class="card-description">Your unique MCP server endpoint for integrations</p>
+                        </div>
+                        <div class="card-content">
+                            <div class="url-field">
+                                <span id="mcpServerUrl">https://mcp.apify.com/</span>
+                                <button class="copy-btn" aria-label="Copy server URL" onclick="copyToClipboard('mcpServerUrl', this)">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                                    </svg>
+                                </button>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- AI Assistants Section -->
-                        <div class="connection-section">
-                            <div class="section-header">
-                                <h2>Connect to AI Assistants</h2>
-                                <p>Integrate Apify MCP with your favorite AI development tools</p>
-                            </div>
-                            <div class="integration-grid">
-                                <!-- Claude -->
-                                <div class="integration-card" data-integration="claude" onclick="showIntegrationDetails('claude')">
-                                    <div class="integration-icon" data-fallback="C">
-                                        <img src="assets/images/claude-icon.svg" alt="Claude">
-                                    </div>
-                                    <h3>Claude</h3>
-                                </div>
-
-                                <!-- Claude Code -->
-                                <div class="integration-card" data-integration="claude-code" onclick="showIntegrationDetails('claude-code')">
-                                    <div class="integration-icon" data-fallback="CC">
-                                        <img src="assets/images/claude-code-icon.svg" alt="Claude Code">
-                                    </div>
-                                    <h3>Claude Code</h3>
-                                </div>
-
-                                <!-- Cursor -->
-                                <div class="integration-card" data-integration="cursor" onclick="showIntegrationDetails('cursor')">
-                                    <div class="integration-icon" data-fallback="⚡">
-                                        <img src="assets/images/cursor-icon.svg" alt="Cursor">
-                                    </div>
-                                    <h3>Cursor</h3>
-                                </div>
-
-                                <!-- VS Code -->
-                                <div class="integration-card" data-integration="vscode" onclick="showIntegrationDetails('vscode')">
-                                    <div class="integration-icon" data-fallback="</>">
-                                        <img src="assets/images/vscode-icon.svg" alt="VS Code">
-                                    </div>
-                                    <h3>VS Code</h3>
-                                </div>
-
-                                <!-- Windsurf -->
-                                <div class="integration-card" data-integration="windsurf" onclick="showIntegrationDetails('windsurf')">
-                                    <div class="integration-icon" data-fallback="🏄">
-                                        <img src="assets/images/windsurf-icon.svg" alt="Windsurf">
-                                    </div>
-                                    <h3>Windsurf</h3>
-                                </div>
-
-                                <!-- Warp -->
-                                <div class="integration-card" data-integration="warp" onclick="showIntegrationDetails('warp')">
-                                    <div class="integration-icon" data-fallback="⚡">
-                                        <img src="assets/images/warp-icon.svg" alt="Warp">
-                                    </div>
-                                    <h3>Warp</h3>
-                                </div>
-                            </div>
+                    <!-- Integrations Section -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Integrations</h3>
                         </div>
-
-                        <!-- API Integrations Section -->
-                        <div class="connection-section">
-                            <div class="section-header">
-                                <h2>API Integrations</h2>
-                                <p>Connect via direct API calls</p>
-                            </div>
-                            <div class="integration-grid">
-                                <!-- Anthropic API -->
-                                <div class="integration-card" data-integration="anthropic-api" onclick="showIntegrationDetails('anthropic-api')">
-                                    <div class="integration-icon" data-fallback="A">
-                                        <img src="assets/images/anthropic-icon.svg" alt="Anthropic">
+                        <div class="card-content">
+                                <!-- AI Applications -->
+                                <div class="integration-section">
+                                    <h4 class="integration-subheading">AI Applications</h4>
+                                    <div class="integration-grid">
+                                    <!-- Claude -->
+                                    <div class="integration-card" data-integration="claude" onclick="showIntegrationDetails('claude')">
+                                        <div class="integration-icon" data-fallback="C">
+                                    <img src="assets/images/claude.png" alt="Claude" loading="lazy" width="48" height="48">
+                                        </div>
+                                        <h3>Claude</h3>
                                     </div>
-                                    <h3>Anthropic API</h3>
+
+                                    <!-- Claude Code -->
+                                    <div class="integration-card" data-integration="claude-code" onclick="showIntegrationDetails('claude-code')">
+                                        <div class="integration-icon" data-fallback="CC">
+                                    <img src="assets/images/anthropic.png" alt="Claude Code" loading="lazy" width="48" height="48">
+                                        </div>
+                                        <h3>Claude Code</h3>
+                                    </div>
+
+                                    <!-- Cursor -->
+                                    <div class="integration-card" data-integration="cursor" onclick="showIntegrationDetails('cursor')">
+                                        <div class="integration-icon" data-fallback="⚡">
+                                    <img src="assets/images/cursor.png" alt="Cursor" loading="lazy" width="48" height="48">
+                                        </div>
+                                        <h3>Cursor</h3>
+                                    </div>
+
+                                    <!-- VS Code -->
+                                    <div class="integration-card" data-integration="vscode" onclick="showIntegrationDetails('vscode')">
+                                        <div class="integration-icon" data-fallback="</>">
+                                    <img src="assets/images/vscode.png" alt="VS Code" loading="lazy" width="48" height="48">
+                                        </div>
+                                        <h3>VS Code</h3>
+                                    </div>
+
+                                    <!-- Windsurf -->
+                                    <div class="integration-card" data-integration="windsurf" onclick="showIntegrationDetails('windsurf')">
+                                        <div class="integration-icon" data-fallback="🏄">
+                                    <img src="assets/images/windsurf.png" alt="Windsurf" loading="lazy" width="48" height="48">
+                                        </div>
+                                        <h3>Windsurf</h3>
+                                    </div>
+
+                                    <!-- Warp -->
+                                    <div class="integration-card" data-integration="warp" onclick="showIntegrationDetails('warp')">
+                                        <div class="integration-icon" data-fallback="⚡">
+                                    <img src="assets/images/warp.jpg" alt="Warp" loading="lazy" width="48" height="48">
+                                        </div>
+                                        <h3>Warp</h3>
+                                    </div>
+                                    </div>
                                 </div>
 
-                                <!-- OpenAI API -->
-                                <div class="integration-card" data-integration="openai-api" onclick="showIntegrationDetails('openai-api')">
-                                    <div class="integration-icon" data-fallback="○">
-                                        <img src="assets/images/openai-icon.svg" alt="OpenAI">
+                                <!-- SDK Integrations -->
+                                <div class="integration-section">
+                                    <h4 class="integration-subheading">SDK Integrations</h4>
+                                    <div class="integration-grid">
+                                    <!-- Python SDK -->
+                                    <div class="integration-card" data-integration="python-sdk" onclick="showIntegrationDetails('python-sdk')">
+                                        <div class="integration-icon" data-fallback="Py">
+                                    <img src="assets/images/python.png" alt="Python" loading="lazy" width="48" height="48">
+                                        </div>
+                                        <h3>Python</h3>
                                     </div>
-                                    <h3>OpenAI API</h3>
-                                </div>
-                            </div>
-                        </div>
 
-                        <!-- SDK Section -->
-                        <div class="connection-section">
-                            <div class="section-header">
-                                <h2>SDK Integration</h2>
-                                <p>Integrate Apify MCP into your applications</p>
-                            </div>
-                            <div class="integration-grid">
-                                <!-- Python SDK -->
-                                <div class="integration-card" data-integration="python-sdk" onclick="showIntegrationDetails('python-sdk')">
-                                    <div class="integration-icon" data-fallback="Py">
-                                        <img src="assets/images/python-icon.svg" alt="Python">
+                                    <!-- TypeScript SDK -->
+                                    <div class="integration-card" data-integration="typescript-sdk" onclick="showIntegrationDetails('typescript-sdk')">
+                                        <div class="integration-icon" data-fallback="TS">
+                                    <img src="assets/images/typescript.png" alt="TypeScript" loading="lazy" width="48" height="48">
+                                        </div>
+                                        <h3>TypeScript</h3>
                                     </div>
-                                    <h3>Python</h3>
-                                </div>
 
-                                <!-- TypeScript SDK -->
-                                <div class="integration-card" data-integration="typescript-sdk" onclick="showIntegrationDetails('typescript-sdk')">
-                                    <div class="integration-icon" data-fallback="TS">
-                                        <img src="assets/images/typescript-icon.svg" alt="TypeScript">
+                                    <!-- JSON Config -->
+                                    <div class="integration-card" data-integration="json-config" onclick="showIntegrationDetails('json-config')">
+                                        <div class="integration-icon" data-fallback="{ }">
+                                    <img src="assets/images/json.png" alt="JSON Config" loading="lazy" width="48" height="48">
+                                        </div>
+                                        <h3>JSON Config</h3>
                                     </div>
-                                    <h3>TypeScript</h3>
+                                    </div>
                                 </div>
 
-                                <!-- JSON Config -->
-                                <div class="integration-card" data-integration="json-config" onclick="showIntegrationDetails('json-config')">
-                                    <div class="integration-icon" data-fallback="{ }">
-                                        <img src="assets/images/json-icon.svg" alt="JSON Config">
+                                <!-- API Integrations -->
+                                <div class="integration-section">
+                                    <h4 class="integration-subheading">API Integrations</h4>
+                                    <div class="integration-grid">
+                                    <!-- Anthropic API -->
+                                    <div class="integration-card" data-integration="anthropic-api" onclick="showIntegrationDetails('anthropic-api')">
+                                        <div class="integration-icon" data-fallback="A">
+                                    <img src="assets/images/anthropic.png" alt="Anthropic" loading="lazy" width="48" height="48">
+                                        </div>
+                                        <h3>Anthropic API</h3>
                                     </div>
-                                    <h3>JSON Config</h3>
+
+                                    <!-- OpenAI API -->
+                                    <div class="integration-card" data-integration="openai-api" onclick="showIntegrationDetails('openai-api')">
+                                        <div class="integration-icon" data-fallback="○">
+                                    <img src="assets/images/openai.svg" alt="OpenAI" loading="lazy" width="48" height="48">
+                                        </div>
+                                        <h3>OpenAI API</h3>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -267,7 +260,7 @@
             <div class="modal-header">
                 <h3>Add Actors</h3>
                 <p>Select the Actors this MCP server can use.</p>
-                <button class="modal-close" onclick="closeActorModal()">×</button>
+                <button class="modal-close" aria-label="Close" onclick="closeActorModal()">×</button>
             </div>
             <div class="modal-body">
                 <div class="search-container">
@@ -297,7 +290,7 @@
         <div class="modal integration-modal">
             <div class="modal-header">
                 <h3 id="integrationTitle">Integration Details</h3>
-                <button class="modal-close" onclick="closeIntegrationModal()">×</button>
+                <button class="modal-close" aria-label="Close" onclick="closeIntegrationModal()">×</button>
             </div>
             <div class="modal-body" id="integrationContent">
                 <!-- Dynamic content will be loaded here -->
@@ -306,13 +299,14 @@
     </div>
 
     <!-- Prism.js core and components -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/toolbar/prism-toolbar.min.js"></script>
+    <!-- Prism JS: ensure availability; lazy loader will no-op if already present -->
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" crossorigin="anonymous" integrity="sha256-57iL3cbHV7L8jLET4kaYAasUp47BqPraTWOR41c/X58="></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" crossorigin="anonymous" integrity="sha256-7UOFaFvPLUk1yNu6tL3hZgPaEyngktK/NsPa3WfpqFw="></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" crossorigin="anonymous" integrity="sha256-hS9VE7ucqdskf4bs/OdKzJHFQXSdNJKRVyQFGP74FSo="></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" crossorigin="anonymous" integrity="sha256-A0Xqg+Ere5dOlTx5pk3qNaQDCDCUSdtwuCAg+2iKwyE="></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" crossorigin="anonymous" integrity="sha256-lW2GuqWufsQQZ1jzVKwtFAvc1/wQPezgL3PtErjWY+Q="></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" crossorigin="anonymous" integrity="sha256-YmCBQRDlGC8pVuO9JXQpVI2dvyqbZqY3GbJs+frJZqc="></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/toolbar/prism-toolbar.min.js" crossorigin="anonymous" integrity="sha256-NSwb7O0HrDJcC+2SASgGuCP8+tdpIhqnzLTZkGRJRCk="></script>
     
     <script src="assets/js/search.js"></script>
     <script src="assets/js/app.js"></script>

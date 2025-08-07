@@ -29,7 +29,7 @@ class ApifySearch {
             const results = await response.json();
             
             // Debug: Log first few items to see what pricingModel values we're getting
-            console.log('API Response sample:', results.items.slice(0, 3).map(actor => ({
+            if (typeof window !== 'undefined' && window.__DEBUG__ !== false) console.log('API Response sample:', results.items.slice(0, 3).map(actor => ({
                 title: actor.title,
                 pricingModel: actor.pricingModel
             })));
@@ -46,7 +46,7 @@ class ApifySearch {
                 ).length
             };
             
-            console.log(`Filtered ${results.items.length} items down to ${filteredResults.items.length}`);
+            if (typeof window !== 'undefined' && window.__DEBUG__ !== false) console.log(`Filtered ${results.items.length} items down to ${filteredResults.items.length}`);
             
             // Cache filtered results for 5 minutes
             this.searchCache.set(cacheKey, filteredResults);
@@ -99,8 +99,8 @@ class ApifySearch {
         }, delay);
     }
 
-    async getPopularActors(limit = 20) {
-        const cacheKey = `popular-${limit}`;
+    async getPopularActorsPage(limit = 20, offset = 0) {
+        const cacheKey = `popular-${limit}-${offset}`;
         
         // Check cache first
         if (this.searchCache.has(cacheKey)) {
@@ -109,8 +109,8 @@ class ApifySearch {
 
         try {
             this.isSearching = true;
-            // Get popular actors without search query - should return by popularity/usage
-            const response = await fetch(`/api/popular/actors?limit=${limit}`);
+            // Get popular actors ordered by popularity with pagination
+            const response = await fetch(`/api/popular/actors?limit=${limit}&offset=${offset}`);
             
             if (!response.ok) {
                 throw new Error(`Popular actors fetch failed: ${response.status}`);
@@ -119,7 +119,7 @@ class ApifySearch {
             const results = await response.json();
             
             // Debug: Log first few items to see what pricingModel values we're getting
-            console.log('Popular API Response sample:', results.items.slice(0, 3).map(actor => ({
+            if (typeof window !== 'undefined' && window.__DEBUG__ !== false) console.log('Popular API Response sample:', results.items.slice(0, 3).map(actor => ({
                 title: actor.title,
                 pricingModel: actor.pricingModel
             })));
@@ -136,7 +136,7 @@ class ApifySearch {
                 ).length
             };
             
-            console.log(`Popular: Filtered ${results.items.length} items down to ${filteredResults.items.length}`);
+            if (typeof window !== 'undefined' && window.__DEBUG__ !== false) console.log(`Popular: Filtered ${results.items.length} items down to ${filteredResults.items.length}`);
             
             // Cache filtered results for 10 minutes
             this.searchCache.set(cacheKey, filteredResults);
@@ -149,6 +149,10 @@ class ApifySearch {
         } finally {
             this.isSearching = false;
         }
+    }
+
+    async getPopularActors(limit = 20) {
+        return this.getPopularActorsPage(limit, 0);
     }
 
     clearCache() {

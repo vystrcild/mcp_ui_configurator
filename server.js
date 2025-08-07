@@ -1,6 +1,9 @@
 require('dotenv').config();
 const express = require('express');
 const path = require('path');
+const helmet = require('helmet');
+const compression = require('compression');
+const rateLimit = require('express-rate-limit');
 const { ApifyClient } = require('apify-client');
 
 // For Node.js versions that don't have fetch globally
@@ -9,24 +12,84 @@ const fetch = require('node-fetch');
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Create Apify client with token from environment variable
-if (!process.env.APIFY_TOKEN) {
-    console.error('⚠️  APIFY_TOKEN environment variable is required!');
-    console.error('Please set your Apify token in the .env file or environment variables.');
-    process.exit(1);
+// APIFY token setup (graceful if missing)
+const hasApifyToken = Boolean(process.env.APIFY_TOKEN);
+if (!hasApifyToken) {
+    console.warn('⚠️  APIFY_TOKEN is not set. UI will load, but /api routes will return 503 until configured.');
 }
 
-const client = new ApifyClient({
-    token: process.env.APIFY_TOKEN
-});
+const client = hasApifyToken
+    ? new ApifyClient({ token: process.env.APIFY_TOKEN })
+    : null;
 
 // Middleware
+app.set('trust proxy', 1);
+// Configure Helmet with a CSP that allows external images and CDNs we use
+app.use(helmet({
+    contentSecurityPolicy: {
+        useDefaults: true,
+        directives: {
+            "default-src": ["'self'"],
+            "img-src": ["'self'", "data:", "https:"],
+            "script-src": ["'self'", "https:"],
+            "script-src-attr": ["'unsafe-inline'"],
+            "style-src": ["'self'", "https:", "'unsafe-inline'"],
+            "font-src": ["'self'", "https:", "data:"],
+            "connect-src": ["'self'", "https:"],
+            "frame-ancestors": ["'self'"]
+        }
+    }
+}));
+app.use(compression());
 app.use(express.json());
-app.use(express.static('.'));
+
+// Simple in-memory cache with TTL
+const responseCache = new Map();
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
+function getCached(key) {
+    const entry = responseCache.get(key);
+    if (!entry) return null;
+    if (Date.now() - entry.timestamp > CACHE_TTL_MS) {
+        responseCache.delete(key);
+        return null;
+    }
+    return entry.data;
+}
+
+function setCached(key, data) {
+    responseCache.set(key, { timestamp: Date.now(), data });
+}
+
+// Dev-only: clear cache endpoint
+if (process.env.NODE_ENV !== 'production') {
+    app.post('/api/_dev/clear-cache', (req, res) => {
+        responseCache.clear();
+        res.status(204).end();
+    });
+}
+
+// Rate limit API routes to protect backend/token
+app.use('/api', rateLimit({
+    windowMs: 60 * 1000,
+    max: 60,
+    standardHeaders: true,
+    legacyHeaders: false,
+}));
+
+// Serve only the assets directory statically
+app.use('/assets', express.static(path.join(__dirname, 'assets'), {
+    dotfiles: 'ignore',
+    immutable: true,
+    maxAge: '7d',
+}));
 
 // Search endpoint for Apify store
 app.get('/api/search/actors', async (req, res) => {
     try {
+        if (!hasApifyToken) {
+            return res.status(503).json({ error: 'Server not configured', message: 'APIFY_TOKEN is required for this endpoint.' });
+        }
         const { query, limit = 50, offset = 0, pricingModel } = req.query;
         
         if (!query || query.trim().length < 2) {
@@ -37,11 +100,17 @@ app.get('/api/search/actors', async (req, res) => {
             });
         }
 
+        // Cache layer
+        const cacheKey = `search:${query.trim().toLowerCase()}:l=${limit}:o=${offset}:p=${pricingModel || ''}`;
+        const cached = getCached(cacheKey);
+        if (cached) return res.json(cached);
+
         // Use the Store API endpoint to get public actors - following exact docs format
         const storeParams = new URLSearchParams({
             limit: Math.min(parseInt(limit), 50), // Reduce from 1000 to 50 for better performance
             offset: parseInt(offset),
-            search: query.trim()
+            search: query.trim(),
+            sortBy: 'relevance',
         });
 
         const requestOptions = {
@@ -87,13 +156,15 @@ app.get('/api/search/actors', async (req, res) => {
             };
         });
 
-        res.json({
+        const payload = {
             items: transformedItems,
             total: searchResults.data?.total || transformedItems.length,
             count: transformedItems.length,
             limit: parseInt(limit),
             offset: parseInt(offset)
-        });
+        };
+        setCached(cacheKey, payload);
+        res.json(payload);
 
     } catch (error) {
         console.error('Search error:', error);
@@ -107,12 +178,21 @@ app.get('/api/search/actors', async (req, res) => {
 // Popular actors endpoint (no search, sorted by usage/popularity)
 app.get('/api/popular/actors', async (req, res) => {
     try {
+        if (!hasApifyToken) {
+            return res.status(503).json({ error: 'Server not configured', message: 'APIFY_TOKEN is required for this endpoint.' });
+        }
         const { limit = 20, offset = 0, pricingModel } = req.query;
+
+        // Cache layer
+        const cacheKey = `popular:l=${limit}:o=${offset}:p=${pricingModel || ''}`;
+        const cached = getCached(cacheKey);
+        if (cached) return res.json(cached);
 
         // Get popular actors without search parameter, should return by popularity
         const storeParams = new URLSearchParams({
             limit: Math.min(parseInt(limit), 50),
-            offset: parseInt(offset)
+            offset: parseInt(offset),
+            sortBy: 'popularity',
             // No search parameter = should return popular/trending actors
         });
 
@@ -156,13 +236,15 @@ app.get('/api/popular/actors', async (req, res) => {
             };
         });
 
-        res.json({
+        const payload = {
             items: transformedItems,
             total: searchResults.data?.total || transformedItems.length,
             count: transformedItems.length,
             limit: parseInt(limit),
             offset: parseInt(offset)
-        });
+        };
+        setCached(cacheKey, payload);
+        res.json(payload);
 
     } catch (error) {
         console.error('Popular actors error:', error);
@@ -176,6 +258,9 @@ app.get('/api/popular/actors', async (req, res) => {
 // Get actor details
 app.get('/api/actors/:userId/:actorName', async (req, res) => {
     try {
+        if (!hasApifyToken) {
+            return res.status(503).json({ error: 'Server not configured', message: 'APIFY_TOKEN is required for this endpoint.' });
+        }
         const { userId, actorName } = req.params;
         const actorId = `${userId}/${actorName}`;
         
@@ -215,6 +300,17 @@ app.get('/api/actors/:userId/:actorName', async (req, res) => {
 // Serve the main page
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// Serve index.html for any other GET request (SPA fallback), excluding API and assets
+app.get(/^(?!\/(api|assets)).*$/, (req, res, next) => {
+    if (req.method !== 'GET') return next();
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// Basic 404 handler for non-GET or unmatched routes
+app.use((req, res) => {
+    res.status(404).send('Not Found');
 });
 
 app.listen(port, () => {

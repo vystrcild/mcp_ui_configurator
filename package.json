@@ -5,7 +5,9 @@
   "main": "index.html",
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js",
+    "dev": "nodemon --quiet server.js",
+    "lint": "eslint .",
+    "format": "prettier -w .",
     "static": "npx serve ."
   },
   "keywords": [
@@ -18,8 +20,19 @@
   "license": "MIT",
   "dependencies": {
     "apify-client": "^2.12.6",
+    "compression": "^1.7.4",
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
+    "express-rate-limit": "^7.4.0",
+    "helmet": "^7.2.0",
     "node-fetch": "^2.7.0"
+  },
+  "devDependencies": {
+    "eslint": "^9.10.0",
+    "nodemon": "^3.1.4",
+    "prettier": "^3.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

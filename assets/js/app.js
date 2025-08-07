@@ -30,7 +30,6 @@ const TOOLS_DATA = [
 let selectedActors = [];
 let selectedTools = ['tool_actor_discovery']; // Actor discovery selected by default
 let enableDynamicActors = true;
-let useToken = false;
 let modalSelection = [];
 let filteredActors = [];
 let searchResults = [];
@@ -41,9 +40,91 @@ let ratingCache = new Map(); // Cache for stable actor ratings
 // DOM Elements - will be initialized after DOM is ready
 let elements = {};
 
+// Simple HTML escaper to prevent HTML injection in template strings
+function escapeHTML(value) {
+    if (value === null || value === undefined) return '';
+    return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+// Ensure aria-labels on icon-only buttons
+function ensureA11yAttributes() {
+    try {
+        document.querySelectorAll('button.copy-btn').forEach((btn) => {
+            if (!btn.getAttribute('aria-label')) btn.setAttribute('aria-label', 'Copy');
+        });
+        document.querySelectorAll('button.modal-close').forEach((btn) => {
+            if (!btn.getAttribute('aria-label')) btn.setAttribute('aria-label', 'Close');
+        });
+    } catch (_) {
+        // no-op
+    }
+}
+
+// Prism lazy loader with SRI
+let prismLoadingPromise = null;
+function loadScriptWithSRI(url, integrity) {
+    return new Promise((resolve, reject) => {
+        // If already present, resolve
+        const existing = Array.from(document.scripts).find(s => s.src === url);
+        if (existing) {
+            existing.addEventListener('load', () => resolve());
+            existing.addEventListener('error', () => reject(new Error(`Failed to load ${url}`)));
+            if (existing.complete || existing.readyState === 'complete') return resolve();
+            return;
+        }
+        const script = document.createElement('script');
+        script.src = url;
+        script.defer = true;
+        script.crossOrigin = 'anonymous';
+        if (integrity) script.integrity = integrity;
+        script.onload = () => resolve();
+        script.onerror = () => reject(new Error(`Failed to load ${url}`));
+        document.body.appendChild(script);
+    });
+}
+
+function loadPrismIfNeeded() {
+    if (window.Prism) return Promise.resolve();
+    if (prismLoadingPromise) return prismLoadingPromise;
+    const base = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0';
+    const assets = [
+        [`${base}/prism.min.js`, 'sha256-57iL3cbHV7L8jLET4kaYAasUp47BqPraTWOR41c/X58='],
+        [`${base}/components/prism-python.min.js`, 'sha256-7UOFaFvPLUk1yNu6tL3hZgPaEyngktK/NsPa3WfpqFw='],
+        [`${base}/components/prism-typescript.min.js`, 'sha256-hS9VE7ucqdskf4bs/OdKzJHFQXSdNJKRVyQFGP74FSo='],
+        [`${base}/components/prism-javascript.min.js`, 'sha256-A0Xqg+Ere5dOlTx5pk3qNaQDCDCUSdtwuCAg+2iKwyE='],
+        [`${base}/components/prism-json.min.js`, 'sha256-lW2GuqWufsQQZ1jzVKwtFAvc1/wQPezgL3PtErjWY+Q='],
+        [`${base}/components/prism-bash.min.js`, 'sha256-YmCBQRDlGC8pVuO9JXQpVI2dvyqbZqY3GbJs+frJZqc='],
+        [`${base}/plugins/toolbar/prism-toolbar.min.js`, 'sha256-NSwb7O0HrDJcC+2SASgGuCP8+tdpIhqnzLTZkGRJRCk='],
+    ];
+    prismLoadingPromise = assets.reduce(
+        (p, [url, sri]) => p.then(() => loadScriptWithSRI(url, sri)),
+        Promise.resolve()
+    );
+    return prismLoadingPromise;
+}
+
+function ensurePrismHighlight(container) {
+    loadPrismIfNeeded().then(() => {
+        setTimeout(() => {
+            (container || document).querySelectorAll('pre code').forEach(block => {
+                try { window.Prism && Prism.highlightElement(block); } catch (_) {}
+            });
+        }, 10);
+    }).catch(() => {
+        // ignore highlight errors
+    });
+}
+
 // Initialize the app
 function init() {
-    console.log('App initializing...');
+    if (typeof window !== 'undefined' && window.__DEBUG__ !== false) {
+        console.log('App initializing...');
+    }
     
     // Initialize DOM elements when DOM is ready
     elements = {
@@ -54,17 +135,26 @@ function init() {
         actorModalOverlay: document.getElementById('actorModalOverlay'),
         actorsGrid: document.getElementById('actorsGrid'),
         actorSearch: document.getElementById('actorSearch'),
-        enableDynamicActors: document.getElementById('enableDynamicActors'),
-        useToken: document.getElementById('useToken')
+        enableDynamicActors: document.getElementById('enableDynamicActors')
     };
     
-    console.log('Elements initialized:', elements);
-    console.log('Modal element:', elements.actorModalOverlay);
-    
+    if (typeof window !== 'undefined' && window.__DEBUG__ !== false) {
+        console.log('Elements initialized:', elements);
+        console.log('Modal element:', elements.actorModalOverlay);
+    }
+
+    // Force dark theme always
+    document.documentElement.classList.add('dark');
+    document.body && document.body.classList.add('dark');
+    const appRoot = document.querySelector('.app');
+    if (appRoot) appRoot.classList.add('dark');
+
     setupEventListeners();
+    setupAccessibility();
     renderSelectedActors();
     renderToolsGrid();
     updateServerConfig();
+    ensureA11yAttributes();
     updateConnectionsPage(); // Initialize code examples with proper formatting
     // Note: renderActorsGrid() is not called here since modal will load data when opened
 }
@@ -81,6 +171,8 @@ function setupEventListeners() {
             switchTab(tab);
         });
     });
+
+    // Removed theme toggle support: app runs in dark mode only
     
     // ESC key to close modals
     document.addEventListener('keydown', (e) => {
@@ -149,12 +241,6 @@ function setupEventListeners() {
         updateServerConfig();
     });
     
-    // Use token checkbox
-    elements.useToken.addEventListener('change', (e) => {
-        useToken = e.target.checked;
-        updateServerConfig();
-        updateAuthDescription();
-    });
     
     // Close modal when clicking overlay
     elements.actorModalOverlay.addEventListener('click', (e) => {
@@ -162,6 +248,147 @@ function setupEventListeners() {
             window.closeActorModal();
         }
     });
+
+    // Also wire close button via JS to avoid relying on inline handlers
+    const actorCloseBtn = elements.actorModalOverlay.querySelector('.modal-close');
+    if (actorCloseBtn) {
+        actorCloseBtn.addEventListener('click', window.closeActorModal);
+    }
+
+    // Integration modal overlay and close button
+    const integrationOverlay = document.getElementById('integrationModalOverlay');
+    if (integrationOverlay) {
+        integrationOverlay.addEventListener('click', (e) => {
+            if (e.target === integrationOverlay) {
+                window.closeIntegrationModal();
+            }
+        });
+        const integrationCloseBtn = integrationOverlay.querySelector('.modal-close');
+        if (integrationCloseBtn) {
+            integrationCloseBtn.addEventListener('click', window.closeIntegrationModal);
+        }
+    }
+
+    // Keyboard support for integration cards
+    document.querySelectorAll('.integration-card').forEach(card => {
+        card.setAttribute('tabindex', '0');
+        card.setAttribute('role', 'button');
+        card.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                const integration = card.getAttribute('data-integration');
+                if (integration) window.showIntegrationDetails(integration);
+            }
+        });
+    });
+}
+
+// Accessibility setup for tabs and modals
+function setupAccessibility() {
+    // Tabs ARIA roles and keyboard navigation
+    const tabsContainer = document.getElementById('tabsContainer');
+    if (tabsContainer) {
+        tabsContainer.setAttribute('role', 'tablist');
+        const tabButtons = document.querySelectorAll('.tab-button');
+        document.querySelectorAll('.tab-content').forEach(panel => panel.setAttribute('role', 'tabpanel'));
+
+        tabButtons.forEach((btn) => {
+            const tabName = btn.dataset.tab;
+            const panel = document.getElementById(tabName);
+            const selected = btn.classList.contains('active');
+
+            btn.setAttribute('role', 'tab');
+            btn.setAttribute('aria-controls', tabName);
+            btn.setAttribute('aria-selected', selected ? 'true' : 'false');
+            btn.setAttribute('tabindex', selected ? '0' : '-1');
+
+            if (panel) {
+                if (!btn.id) btn.id = `tab-${tabName}`;
+                panel.setAttribute('aria-labelledby', btn.id);
+            }
+        });
+
+        tabsContainer.addEventListener('keydown', (e) => {
+            const keys = ['ArrowLeft', 'ArrowRight', 'Home', 'End'];
+            if (!keys.includes(e.key)) return;
+            e.preventDefault();
+            const tabs = Array.from(document.querySelectorAll('.tab-button'));
+            let currentIndex = tabs.findIndex(t => t === document.activeElement);
+            if (currentIndex === -1) currentIndex = tabs.findIndex(t => t.getAttribute('aria-selected') === 'true');
+            let nextIndex = currentIndex;
+            if (e.key === 'ArrowRight') nextIndex = (currentIndex + 1) % tabs.length;
+            if (e.key === 'ArrowLeft') nextIndex = (currentIndex - 1 + tabs.length) % tabs.length;
+            if (e.key === 'Home') nextIndex = 0;
+            if (e.key === 'End') nextIndex = tabs.length - 1;
+            tabs[nextIndex].focus();
+            tabs[nextIndex].click();
+        });
+    }
+
+    // Modal ARIA attributes
+    const actorOverlay = document.getElementById('actorModalOverlay');
+    if (actorOverlay) {
+        const modal = actorOverlay.querySelector('.modal');
+        const title = actorOverlay.querySelector('.modal-header h3');
+        if (modal) {
+            modal.setAttribute('role', 'dialog');
+            modal.setAttribute('aria-modal', 'true');
+            if (title) {
+                if (!title.id) title.id = 'actorModalTitle';
+                modal.setAttribute('aria-labelledby', title.id);
+            }
+        }
+    }
+
+    const integrationOverlay = document.getElementById('integrationModalOverlay');
+    if (integrationOverlay) {
+        const modal = integrationOverlay.querySelector('.modal');
+        if (modal) {
+            modal.setAttribute('role', 'dialog');
+            modal.setAttribute('aria-modal', 'true');
+            modal.setAttribute('aria-labelledby', 'integrationTitle');
+        }
+    }
+}
+
+let lastFocusedElement = null;
+function trapFocus(modalEl) {
+    lastFocusedElement = document.activeElement;
+    const focusableSelectors = [
+        'a[href]', 'area[href]', 'input:not([disabled])', 'select:not([disabled])',
+        'textarea:not([disabled])', 'button:not([disabled])', 'iframe', 'object', 'embed',
+        '[contenteditable]', '[tabindex]:not([tabindex="-1"])'
+    ];
+    const focusable = Array.from(modalEl.querySelectorAll(focusableSelectors.join(',')))
+        .filter(el => el.offsetParent !== null);
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+
+    function onKeydown(e) {
+        if (e.key !== 'Tab') return;
+        if (focusable.length === 0) return;
+        if (e.shiftKey && document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+        }
+    }
+    modalEl.__trapHandler = onKeydown;
+    document.addEventListener('keydown', onKeydown);
+    if (first) first.focus();
+}
+
+function releaseFocus(modalEl) {
+    if (modalEl && modalEl.__trapHandler) {
+        document.removeEventListener('keydown', modalEl.__trapHandler);
+        delete modalEl.__trapHandler;
+    }
+    if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') {
+        lastFocusedElement.focus();
+    }
+    lastFocusedElement = null;
 }
 
 // Rendering functions
@@ -183,17 +410,17 @@ function renderSelectedActors() {
         actorCard.className = 'selected-actor-card';
         
         actorCard.innerHTML = `
-            <button class="btn btn-ghost btn-icon remove-actor-btn" onclick="removeActor('${actor.id}')">
+            <button class="btn btn-ghost btn-icon remove-actor-btn" onclick="removeActor('${escapeHTML(actor.id)}')">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M18 6L6 18M6 6l12 12"/>
                 </svg>
                 <span class="sr-only">Remove Actor</span>
             </button>
             <div class="selected-actor-content">
-                <img src="${actor.icon || 'assets/images/placeholder.svg'}" alt="${actor.title}" class="selected-actor-icon">
+                <img src="${actor.icon || 'assets/images/placeholder-user.jpg'}" alt="${escapeHTML(actor.title)}" class="selected-actor-icon" loading="lazy" width="40" height="40" onerror="this.onerror=null;this.src='assets/images/placeholder-user.jpg'">
                 <div class="selected-actor-info">
-                    <p class="selected-actor-title">${actor.title}</p>
-                    <p class="selected-actor-path">${actor.path}</p>
+                    <p class="selected-actor-title">${escapeHTML(actor.title)}</p>
+                    <p class="selected-actor-path">${escapeHTML(actor.path)}</p>
                 </div>
             </div>
         `;
@@ -264,18 +491,24 @@ function renderToolsGrid() {
 }
 
 function renderActorsGrid() {
-    console.log('renderActorsGrid called');
-    console.log('isUsingSearch:', isUsingSearch);
-    console.log('searchResults:', searchResults);
-    console.log('filteredActors:', filteredActors);
+    if (typeof window !== 'undefined' && window.__DEBUG__ !== false) {
+        console.log('renderActorsGrid called');
+        console.log('isUsingSearch:', isUsingSearch);
+        console.log('searchResults:', searchResults);
+        console.log('filteredActors:', filteredActors);
+    }
     
     elements.actorsGrid.innerHTML = '';
     
     const actorsToRender = isUsingSearch ? searchResults : filteredActors;
-    console.log('actorsToRender:', actorsToRender.length, 'items');
+    if (typeof window !== 'undefined' && window.__DEBUG__ !== false) {
+        console.log('actorsToRender:', actorsToRender.length, 'items');
+    }
     
     if (actorsToRender.length === 0) {
-        console.log('Showing empty state');
+        if (typeof window !== 'undefined' && window.__DEBUG__ !== false) {
+            console.log('Showing empty state');
+        }
         const emptyState = document.createElement('div');
         emptyState.className = 'empty-search-state';
         emptyState.innerHTML = `
@@ -308,22 +541,24 @@ function renderActorsGrid() {
         const description = actor.description || actor.title;
 
         // Debug logging - show complete actor object structure
-        console.log('Full actor object:', actor);
-        console.log('Actor image fields:', {
-            title: actor.title,
-            pictureUrl: actor.pictureUrl,
-            userPictureUrl: actor.userPictureUrl,
-            icon: actor.icon,
-            avatar: actor.avatar,
-            userAvatar: actor.userAvatar,
-            image: actor.image,
-            logo: actor.logo,
-            username: actor.username
-        });
+        if (typeof window !== 'undefined' && window.__DEBUG__ !== false) {
+            console.log('Full actor object:', actor);
+            console.log('Actor image fields:', {
+                title: actor.title,
+                pictureUrl: actor.pictureUrl,
+                userPictureUrl: actor.userPictureUrl,
+                icon: actor.icon,
+                avatar: actor.avatar,
+                userAvatar: actor.userAvatar,
+                image: actor.image,
+                logo: actor.logo,
+                username: actor.username
+            });
+        }
 
         const iconHtml = actor.pictureUrl || actor.icon ? 
-            `<img src="${actor.pictureUrl || actor.icon}" alt="${actor.title}" class="actor-icon">` :
-            `<img src="assets/images/placeholder.svg" alt="${actor.title}" class="actor-icon">`;
+            `<img src="${actor.pictureUrl || actor.icon}" alt="${escapeHTML(actor.title)}" class="actor-icon" loading="lazy" width="40" height="40" onerror="this.onerror=null;this.src='assets/images/placeholder-user.jpg'">` :
+            `<img src="assets/images/placeholder-user.jpg" alt="${escapeHTML(actor.title)}" class="actor-icon" loading="lazy" width="40" height="40">`;
 
         actorCard.innerHTML = `
             <div class="actor-card-header">
@@ -331,17 +566,17 @@ function renderActorsGrid() {
                     ${iconHtml}
                 </div>
                 <div class="actor-card-title-section">
-                    <h4 class="actor-card-title">${actor.title}</h4>
-                    <p class="actor-card-path">${actor.path}</p>
+                    <h4 class="actor-card-title">${escapeHTML(actor.title)}</h4>
+                    <p class="actor-card-path">${escapeHTML(actor.path)}</p>
                 </div>
             </div>
             <div class="actor-card-description">
-                <p>${description}</p>
+                <p>${escapeHTML(description)}</p>
             </div>
             <div class="actor-card-footer">
                 <div class="actor-card-company">
-                    <img src="${companyLogo}" alt="${companyName}" class="company-logo">
-                    <span class="company-name">${companyName}</span>
+                    <img src="${companyLogo}" alt="${escapeHTML(companyName)}" class="company-logo" loading="lazy" width="24" height="24" onerror="this.onerror=null;this.src='assets/images/placeholder-user.jpg'">
+                    <span class="company-name">${escapeHTML(companyName)}</span>
                 </div>
                 <div class="actor-card-stats">
                     <span class="run-count">
@@ -369,19 +604,26 @@ function renderActorsGrid() {
 async function openActorModal() {
     modalSelection = [...selectedActors];
     elements.actorModalOverlay.classList.add('active');
+    const modalBox = elements.actorModalOverlay.querySelector('.modal');
+    if (modalBox) trapFocus(modalBox);
     
-    // Load popular actors by default (all actors ordered by usage)
+    // Load first page of popular actors and enable infinite scroll
     showSearchLoading();
     try {
-        const results = await window.apifySearch.getPopularActors(20);
-        console.log('Modal got results:', results);
+        window.__actorsScroll = { offset: 0, limit: 20, total: null, loading: false };
+        const { limit } = window.__actorsScroll;
+        const results = await window.apifySearch.getPopularActorsPage(limit, 0);
+        if (typeof window !== 'undefined' && window.__DEBUG__ !== false) {
+            console.log('Modal got results:', results);
+        }
         if (results.items && results.items.length > 0) {
             searchResults = results.items;
             isUsingSearch = true;
-            console.log('About to render grid with:', searchResults.length, 'items');
+            window.__actorsScroll.total = results.total ?? results.items.length;
+            window.__actorsScroll.offset = results.offset + results.count;
             renderActorsGrid();
+            attachInfiniteScroll();
         } else {
-            console.log('No items found, showing empty state');
             showEmptyState();
         }
     } catch (error) {
@@ -396,6 +638,8 @@ window.closeActorModal = function() {
     if (modal) {
         modal.classList.remove('active');
     }
+    const modalBox = modal ? modal.querySelector('.modal') : null;
+    if (modalBox) releaseFocus(modalBox);
     
     // Clear search
     const searchInput = document.getElementById('actorSearch');
@@ -407,6 +651,12 @@ window.closeActorModal = function() {
     filteredActors = [];
     searchResults = [];
     isUsingSearch = false;
+    // detach infinite scroll listener
+    if (modal && modal.__onInfiniteScroll) {
+        const modalBody = modal.querySelector('.modal-body');
+        if (modalBody) modalBody.removeEventListener('scroll', modal.__onInfiniteScroll);
+        delete modal.__onInfiniteScroll;
+    }
 }
 
 function toggleActorSelection(actor) {
@@ -419,6 +669,43 @@ function toggleActorSelection(actor) {
     }
     
     renderActorsGrid();
+}
+
+function attachInfiniteScroll() {
+    const grid = elements.actorsGrid;
+    const overlay = elements.actorModalOverlay;
+    if (!grid || !overlay) return;
+
+    function onScroll(e) {
+        const container = e.target.closest('.modal .modal-body') || e.target;
+        if (!container || window.__actorsScroll?.loading) return;
+        const nearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 200;
+        const state = window.__actorsScroll;
+        if (!state || state.total !== null && state.offset >= state.total) return;
+        if (!nearBottom) return;
+        // Load next page
+        state.loading = true;
+        window.apifySearch.getPopularActorsPage(state.limit, state.offset).then(results => {
+            const newItems = results.items || [];
+            if (newItems.length > 0) {
+                searchResults = searchResults.concat(newItems);
+                renderActorsGrid();
+                state.total = results.total ?? state.total;
+                state.offset = results.offset + results.count;
+            }
+        }).catch(() => {
+            // ignore
+        }).finally(() => {
+            state.loading = false;
+        });
+    }
+
+    // Attach to modal body for scrolling
+    const modalBody = overlay.querySelector('.modal-body');
+    if (modalBody) {
+        modalBody.addEventListener('scroll', onScroll);
+        overlay.__onInfiniteScroll = onScroll;
+    }
 }
 
 window.saveActorSelection = function() {
@@ -499,12 +786,7 @@ function generateServerConfig() {
         mcpServers: {
             [serverName]: {
                 command: "npx",
-                args: args,
-                ...(useToken && {
-                    env: {
-                        APIFY_TOKEN: "YOUR_APIFY_TOKEN",
-                    },
-                }),
+                args: args
             },
         },
     };
@@ -546,21 +828,25 @@ function generateMcpUrl() {
 }
 
 function updateServerConfig() {
-    // Update server config with copy button
-    elements.serverConfig.innerHTML = `${generateServerConfig()}<button class="copy-btn-inline" onclick="copyToClipboard('serverConfig')" title="Copy to clipboard">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
-            <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
-        </svg>
-    </button>`;
+    // Update server config with copy button (only if container exists)
+    if (elements.serverConfig) {
+        elements.serverConfig.innerHTML = `${generateServerConfig()}<button class="copy-btn-inline" onclick="copyToClipboard('serverConfig')" title="Copy to clipboard">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+                <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+            </svg>
+        </button>`;
+    }
     
-    // Update server URL with copy button
-    elements.serverUrl.innerHTML = `${generateMcpUrl()}<button class="copy-btn-inline" onclick="copyToClipboard('serverUrl')" title="Copy to clipboard">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
-            <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
-        </svg>
-    </button>`;
+    // Update server URL with copy button (only if container exists)
+    if (elements.serverUrl) {
+        elements.serverUrl.innerHTML = `${generateMcpUrl()}<button class="copy-btn-inline" onclick="copyToClipboard('serverUrl')" title="Copy to clipboard">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+                <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+            </svg>
+        </button>`;
+    }
 }
 
 // Utility functions
@@ -612,17 +898,6 @@ function switchTab(tabName) {
     });
 }
 
-// Update authentication description
-function updateAuthDescription() {
-    const authDescription = document.getElementById('authDescription');
-    if (authDescription) {
-        if (useToken) {
-            authDescription.textContent = 'Replace YOUR_APIFY_TOKEN with your actual Apify API token.';
-        } else {
-            authDescription.textContent = 'No token configuration needed - OAuth will be used automatically.';
-        }
-    }
-}
 
 // Search UI helpers
 function showSearchLoading() {
@@ -637,7 +912,7 @@ function showSearchLoading() {
 function showSearchError(error) {
     elements.actorsGrid.innerHTML = `
         <div class="search-error">
-            <p>Search failed: ${error}</p>
+            <p>Search failed: ${escapeHTML(error)}</p>
             <p class="text-sm text-muted-foreground">Please try again or check your connection.</p>
         </div>
     `;
@@ -688,7 +963,9 @@ window.copyToClipboard = function(elementId, button) {
         text = element.textContent;
     }
     
-    navigator.clipboard.writeText(text).then(() => {
+    const writeClipboard = () => navigator.clipboard.writeText(text);
+
+    const onSuccess = () => {
         if (targetButton) {
             const originalContent = targetButton.innerHTML;
             const isInlineButton = targetButton.classList.contains('copy-btn-inline');
@@ -719,9 +996,35 @@ window.copyToClipboard = function(elementId, button) {
                 targetButton.innerHTML = originalContent;
             }, 2000);
         }
-    }).catch(err => {
+    };
+
+    const onFailure = (err) => {
+        try {
+            // Fallback for insecure contexts: use a hidden textarea + execCommand
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.setAttribute('readonly', '');
+            textarea.style.position = 'absolute';
+            textarea.style.left = '-9999px';
+            document.body.appendChild(textarea);
+            const selection = document.getSelection();
+            const selected = selection && selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
+            textarea.select();
+            const ok = document.execCommand('copy');
+            document.body.removeChild(textarea);
+            if (selected && selection) {
+                selection.removeAllRanges();
+                selection.addRange(selected);
+            }
+            if (ok) return onSuccess();
+        } catch (fallbackErr) {
+            console.error('Copy fallback failed: ', fallbackErr);
+        }
         console.error('Failed to copy: ', err);
-    });
+    };
+
+    // Try modern API first, then fallback
+    writeClipboard().then(onSuccess).catch(onFailure);
 }
 
 window.copyCode = function(button) {
@@ -834,7 +1137,7 @@ window.showIntegrationDetails = function(integration) {
                         <li>Run the following command to add this Apify MCP server:</li>
                     </ol>
                     <div class="code-block">
-                        <pre><code class="language-bash">claude mcp add apify ${document.getElementById('mcpServerUrl').textContent} -t http -H "Authorization: Bearer ${useToken.checked ? '••••••••' : 'YOUR_API_KEY'}"</code></pre>
+                        <pre><code class="language-bash">claude mcp add apify ${document.getElementById('mcpServerUrl').textContent} -t http -H "Authorization: Bearer YOUR_API_KEY"</code></pre>
                         <button class="copy-code-btn" onclick="copyCode(this)">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
@@ -848,7 +1151,7 @@ window.showIntegrationDetails = function(integration) {
                     <h4>API Key</h4>
                     <p>The API key for this MCP server.</p>
                     <div class="code-block">
-                        <pre><code>${useToken.checked ? '••••••••••••••••••••' : 'YOUR_API_KEY_HERE'}</code></pre>
+                        <pre><code>YOUR_API_KEY_HERE</code></pre>
                         <button class="copy-code-btn" onclick="copyCode(this)">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
@@ -1154,7 +1457,7 @@ window.showIntegrationDetails = function(integration) {
                     <p>The API key for this MCP server.</p>
                     <p>Pass this in a Authorization: Bearer {apiKey} header when calling the Apify MCP server.</p>
                     <div class="code-block">
-                        <pre><code>${useToken.checked ? '••••••••••••••••••••' : 'YOUR_API_KEY_HERE'}</code></pre>
+                        <pre><code>YOUR_API_KEY_HERE</code></pre>
                         <button class="copy-code-btn" onclick="copyCode(this)">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
@@ -1184,7 +1487,7 @@ window.showIntegrationDetails = function(integration) {
       "type": "url",
       "url": "${document.getElementById('mcpServerUrl').textContent}",
       "name": "apify",
-      "authorization_token": "${useToken.checked ? '••••••••' : 'YOUR_API_KEY'}"
+      "authorization_token": "YOUR_API_KEY"
     }
   ]
 }'</code></pre>
@@ -1239,7 +1542,7 @@ window.showIntegrationDetails = function(integration) {
                     <p>The API key for this MCP server.</p>
                     <p>Pass this in a Authorization: Bearer {apiKey} header when calling the Apify MCP server.</p>
                     <div class="code-block">
-                        <pre><code>${useToken.checked ? '••••••••••••••••••••' : 'YOUR_API_KEY_HERE'}</code></pre>
+                        <pre><code>YOUR_API_KEY_HERE</code></pre>
                         <button class="copy-code-btn" onclick="copyCode(this)">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
@@ -1267,7 +1570,7 @@ window.showIntegrationDetails = function(integration) {
       "server_url": "${document.getElementById('mcpServerUrl').textContent}",
       "require_approval": "never",
       "headers": {
-        "Authorization": "Bearer ${useToken.checked ? '••••••••' : 'YOUR_API_KEY'}"
+        "Authorization": "Bearer YOUR_API_KEY"
       }
     }
   ],
@@ -1331,7 +1634,7 @@ async def main():
                     <p>Pass your API key in the Authorization header when connecting to the MCP server:</p>
                     <div class="code-block">
                         <pre><code class="language-python">headers = {
-    "Authorization": "Bearer ${useToken.checked ? 'YOUR_APIFY_TOKEN' : 'YOUR_API_KEY'}"
+    "Authorization": "Bearer YOUR_API_KEY"
 }
 # Pass headers to your HTTP client configuration</code></pre>
                         <button class="copy-code-btn" onclick="copyCode(this)">
@@ -1373,7 +1676,7 @@ import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk";
 const serverUrl = "${document.getElementById('mcpServerUrl').textContent}";
 const transport = new StreamableHTTPClientTransport(serverUrl, {
     headers: {
-        "Authorization": "Bearer ${useToken.checked ? 'YOUR_APIFY_TOKEN' : 'YOUR_API_KEY'}"
+        "Authorization": "Bearer YOUR_API_KEY"
     }
 });
 
@@ -1400,7 +1703,7 @@ console.log("Available tools:", tools.map(t => t.name));</code></pre>
                     <div class="code-block">
                         <pre><code class="language-typescript">const transport = new StreamableHTTPClientTransport(serverUrl, {
     headers: {
-        "Authorization": "Bearer ${useToken.checked ? 'YOUR_APIFY_TOKEN' : 'YOUR_API_KEY'}"
+        "Authorization": "Bearer YOUR_API_KEY"
     }
 });</code></pre>
                         <button class="copy-code-btn" onclick="copyCode(this)">
@@ -1442,7 +1745,7 @@ console.log("Available tools:", tools.map(t => t.name));</code></pre>
         "@apify/mcp-server",
         "--profile",
         "default"
-      ]${useToken.checked ? ',\n      "env": {\n        "APIFY_TOKEN": "YOUR_APIFY_TOKEN"\n      }' : ''}
+      ]
     }
   }
 }</code></pre>
@@ -1472,7 +1775,7 @@ console.log("Available tools:", tools.map(t => t.name));</code></pre>
         "@apify/mcp-server",
         "--profile",
         "default"
-      ]${useToken.checked ? ',\n      "env": {\n        "APIFY_TOKEN": "YOUR_APIFY_TOKEN"\n      }' : ''}
+      ]
     }
   }
 }</code></pre>
@@ -1501,7 +1804,7 @@ console.log("Available tools:", tools.map(t => t.name));</code></pre>
         "@apify/mcp-server",
         "--profile",
         "default"
-      ]${useToken.checked ? ',\n      "env": {\n        "APIFY_TOKEN": "YOUR_APIFY_TOKEN"\n      }' : ''}
+      ]
     }
   }
 }</code></pre>
@@ -1535,21 +1838,19 @@ console.log("Available tools:", tools.map(t => t.name));</code></pre>
         title.textContent = details.title;
         content.innerHTML = details.content;
         modal.classList.add('active');
+        const modalBox = modal.querySelector('.modal');
+        if (modalBox) trapFocus(modalBox);
         
-        // Apply Prism highlighting to all code blocks in the modal
-        if (window.Prism) {
-            setTimeout(() => {
-                content.querySelectorAll('pre code').forEach(block => {
-                    Prism.highlightElement(block);
-                });
-            }, 10);
-        }
+        // Apply Prism highlighting to all code blocks in the modal (lazy-load Prism if needed)
+        ensurePrismHighlight(content);
     }
 }
 
 window.closeIntegrationModal = function() {
     const modal = document.getElementById('integrationModalOverlay');
     modal.classList.remove('active');
+    const modalBox = modal.querySelector('.modal');
+    if (modalBox) releaseFocus(modalBox);
 }
 
 // Update the MCP server URL dynamically
@@ -1572,10 +1873,8 @@ async def main():
             await session.initialize()
             tools_result = await session.list_tools()
             print("Available tools:", [t.name for t in tools_result.tools])`.trim();
-        // Re-highlight with Prism
-        if (window.Prism) {
-            Prism.highlightElement(pythonExample);
-        }
+        // Re-highlight with Prism (lazy)
+        ensurePrismHighlight(pythonExample.parentElement);
     }
     
     const typescriptExample = document.getElementById('typescriptExample');
@@ -1594,10 +1893,8 @@ const client = new Client({
 await client.connect(transport);
 const tools = await client.listTools();
 console.log("Available tools:", tools.map(t => t.name));`.trim();
-        // Re-highlight with Prism
-        if (window.Prism) {
-            Prism.highlightElement(typescriptExample);
-        }
+        // Re-highlight with Prism (lazy)
+        ensurePrismHighlight(typescriptExample.parentElement);
     }
 }
 
