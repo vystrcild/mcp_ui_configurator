@@ -38,25 +38,34 @@ let isUsingSearch = false;
 let activeTab = "configuration";
 let ratingCache = new Map(); // Cache for stable actor ratings
 
-// DOM Elements
-const elements = {
-    selectedActors: document.getElementById('selectedActors'),
-    toolsGrid: document.getElementById('toolsGrid'),
-    serverUrl: document.getElementById('serverUrl'),
-    serverConfig: document.getElementById('serverConfig'),
-    actorModalOverlay: document.getElementById('actorModalOverlay'),
-    actorsGrid: document.getElementById('actorsGrid'),
-    actorSearch: document.getElementById('actorSearch'),
-    enableDynamicActors: document.getElementById('enableDynamicActors'),
-    useToken: document.getElementById('useToken')
-};
+// DOM Elements - will be initialized after DOM is ready
+let elements = {};
 
 // Initialize the app
 function init() {
+    console.log('App initializing...');
+    
+    // Initialize DOM elements when DOM is ready
+    elements = {
+        selectedActors: document.getElementById('selectedActors'),
+        toolsGrid: document.getElementById('toolsGrid'),
+        serverUrl: document.getElementById('serverUrl'),
+        serverConfig: document.getElementById('serverConfig'),
+        actorModalOverlay: document.getElementById('actorModalOverlay'),
+        actorsGrid: document.getElementById('actorsGrid'),
+        actorSearch: document.getElementById('actorSearch'),
+        enableDynamicActors: document.getElementById('enableDynamicActors'),
+        useToken: document.getElementById('useToken')
+    };
+    
+    console.log('Elements initialized:', elements);
+    console.log('Modal element:', elements.actorModalOverlay);
+    
     setupEventListeners();
     renderSelectedActors();
     renderToolsGrid();
     updateServerConfig();
+    updateConnectionsPage(); // Initialize code examples with proper formatting
     // Note: renderActorsGrid() is not called here since modal will load data when opened
 }
 
@@ -71,6 +80,21 @@ function setupEventListeners() {
             const tab = e.currentTarget.dataset.tab;
             switchTab(tab);
         });
+    });
+    
+    // ESC key to close modals
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' || e.key === 'Esc') {
+            // Close actor modal if it's open
+            if (elements.actorModalOverlay.classList.contains('active')) {
+                window.closeActorModal();
+            }
+            // Close integration modal if it's open
+            const integrationModal = document.getElementById('integrationModalOverlay');
+            if (integrationModal && integrationModal.classList.contains('active')) {
+                window.closeIntegrationModal();
+            }
+        }
     });
     
     // Actor search with debouncing
@@ -135,7 +159,7 @@ function setupEventListeners() {
     // Close modal when clicking overlay
     elements.actorModalOverlay.addEventListener('click', (e) => {
         if (e.target === elements.actorModalOverlay) {
-            closeActorModal();
+            window.closeActorModal();
         }
     });
 }
@@ -222,7 +246,7 @@ function renderToolsGrid() {
         
         const toolItem = document.createElement('div');
         toolItem.className = 'tool-item optional';
-        toolItem.onclick = () => toggleTool(tool.id);
+        toolItem.onclick = () => window.toggleTool(tool.id);
         toolItem.innerHTML = `
             <div class="tool-checkbox">
                 <input type="checkbox" ${isSelected ? 'checked' : ''}>
@@ -366,9 +390,20 @@ async function openActorModal() {
     }
 }
 
-function closeActorModal() {
-    elements.actorModalOverlay.classList.remove('active');
-    elements.actorSearch.value = '';
+window.closeActorModal = function() {
+    // Direct approach - always get fresh reference
+    const modal = document.getElementById('actorModalOverlay');
+    if (modal) {
+        modal.classList.remove('active');
+    }
+    
+    // Clear search
+    const searchInput = document.getElementById('actorSearch');
+    if (searchInput) {
+        searchInput.value = '';
+    }
+    
+    // Clear state
     filteredActors = [];
     searchResults = [];
     isUsingSearch = false;
@@ -386,14 +421,40 @@ function toggleActorSelection(actor) {
     renderActorsGrid();
 }
 
-function saveActorSelection() {
-    selectedActors = [...modalSelection];
-    renderSelectedActors();
-    updateServerConfig();
-    closeActorModal();
+window.saveActorSelection = function() {
+    try {
+        // Update the selected actors
+        selectedActors = [...modalSelection];
+        renderSelectedActors();
+        updateServerConfig();
+        
+        // Close the modal - direct approach
+        const modal = document.getElementById('actorModalOverlay');
+        if (modal) {
+            modal.classList.remove('active');
+        }
+        
+        // Clear search
+        const searchInput = document.getElementById('actorSearch');
+        if (searchInput) {
+            searchInput.value = '';
+        }
+        
+        // Clear state
+        filteredActors = [];
+        searchResults = [];
+        isUsingSearch = false;
+    } catch (error) {
+        console.error('Error in saveActorSelection:', error);
+        // Still try to close the modal even if there's an error
+        const modal = document.getElementById('actorModalOverlay');
+        if (modal) {
+            modal.classList.remove('active');
+        }
+    }
 }
 
-function removeActor(actorId) {
+window.removeActor = function(actorId) {
     selectedActors = selectedActors.filter(a => a.id !== actorId);
     renderSelectedActors();
     updateServerConfig();
@@ -401,7 +462,7 @@ function removeActor(actorId) {
 
 
 // Tool management
-function toggleTool(toolId) {
+window.toggleTool = function(toolId) {
     const isSelected = selectedTools.includes(toolId);
     
     if (isSelected) {
@@ -534,37 +595,7 @@ function getStableRating(actor) {
     return rating;
 }
 
-function copyToClipboard(elementId) {
-    const element = document.getElementById(elementId);
-    const button = element.querySelector('.copy-btn-inline');
-    
-    // Get text content excluding the button
-    let text = '';
-    if (elementId === 'serverConfig') {
-        text = generateServerConfig();
-    } else if (elementId === 'serverUrl') {
-        text = generateMcpUrl();
-    }
-    
-    navigator.clipboard.writeText(text).then(() => {
-        // Show a temporary success message
-        if (button) {
-            const originalContent = button.innerHTML;
-            button.innerHTML = `
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="20,6 9,17 4,12"/>
-                </svg>
-            `;
-            button.style.color = 'var(--success)';
-            setTimeout(() => {
-                button.innerHTML = originalContent;
-                button.style.color = '';
-            }, 2000);
-        }
-    }).catch(err => {
-        console.error('Failed to copy: ', err);
-    });
-}
+// This function is now defined as window.copyToClipboard below
 
 // Tab management
 function switchTab(tabName) {
@@ -623,3 +654,728 @@ function showEmptyState() {
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', init);
+
+// Debug function to test modal closing
+window.debugCloseModal = function() {
+    console.log('=== DEBUG CLOSE MODAL ===');
+    const modal = document.getElementById('actorModalOverlay');
+    console.log('Modal element:', modal);
+    console.log('Current classes:', modal ? modal.className : 'null');
+    console.log('Current display:', modal ? window.getComputedStyle(modal).display : 'null');
+    
+    if (modal) {
+        modal.classList.remove('active');
+        console.log('After removing active:');
+        console.log('Classes:', modal.className);
+        console.log('Display:', window.getComputedStyle(modal).display);
+    }
+    console.log('=== END DEBUG ===');
+}
+
+// Connections page functions
+window.copyToClipboard = function(elementId, button) {
+    const element = document.getElementById(elementId);
+    
+    // Handle both inline copy buttons and regular copy buttons
+    let text = '';
+    let targetButton = button || element.querySelector('.copy-btn-inline');
+    
+    if (elementId === 'serverConfig') {
+        text = generateServerConfig();
+    } else if (elementId === 'serverUrl') {
+        text = generateMcpUrl();
+    } else {
+        text = element.textContent;
+    }
+    
+    navigator.clipboard.writeText(text).then(() => {
+        if (targetButton) {
+            const originalContent = targetButton.innerHTML;
+            const isInlineButton = targetButton.classList.contains('copy-btn-inline');
+            
+            if (isInlineButton) {
+                targetButton.innerHTML = `
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20,6 9,17 4,12"/>
+                    </svg>
+                `;
+                targetButton.style.color = 'var(--success)';
+            } else {
+                targetButton.classList.add('copied');
+                targetButton.innerHTML = `
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    Copied!
+                `;
+            }
+            
+            setTimeout(() => {
+                if (isInlineButton) {
+                    targetButton.style.color = '';
+                } else {
+                    targetButton.classList.remove('copied');
+                }
+                targetButton.innerHTML = originalContent;
+            }, 2000);
+        }
+    }).catch(err => {
+        console.error('Failed to copy: ', err);
+    });
+}
+
+window.copyCode = function(button) {
+    const codeBlock = button.parentElement.querySelector('code');
+    const text = codeBlock.textContent;
+    
+    navigator.clipboard.writeText(text).then(() => {
+        const originalText = button.textContent;
+        button.classList.add('copied');
+        button.textContent = 'Copied!';
+        
+        setTimeout(() => {
+            button.classList.remove('copied');
+            button.textContent = originalText;
+        }, 2000);
+    });
+}
+
+window.switchSDKTab = function(sdk) {
+    // Remove active class from all tabs and panels
+    document.querySelectorAll('.sdk-tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    document.querySelectorAll('.sdk-panel').forEach(panel => {
+        panel.classList.remove('active');
+    });
+    
+    // Add active class to selected tab and panel
+    document.querySelector(`.sdk-tab[data-sdk="${sdk}"]`).classList.add('active');
+    document.querySelector(`.sdk-panel[data-sdk-panel="${sdk}"]`).classList.add('active');
+}
+
+window.switchPlatformTab = function(platform) {
+    // Remove active class from all tabs and panels
+    document.querySelectorAll('.platform-tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    document.querySelectorAll('.platform-panel').forEach(panel => {
+        panel.classList.remove('active');
+    });
+    
+    // Add active class to selected tab and panel
+    document.querySelector(`.platform-tab[data-platform="${platform}"]`).classList.add('active');
+    document.querySelector(`.platform-panel[data-platform-panel="${platform}"]`).classList.add('active');
+}
+
+window.showIntegrationDetails = function(integration) {
+    const modal = document.getElementById('integrationModalOverlay');
+    const title = document.getElementById('integrationTitle');
+    const content = document.getElementById('integrationContent');
+    
+    // Integration details content
+    const integrationDetails = {
+        'claude': {
+            title: 'Connect to Claude',
+            content: `
+                <div class="integration-step">
+                    <p>Connect Claude to Apify MCP, enabling it to perform real-world tasks through a simple, secure connection without leaving your conversation.</p>
+                </div>
+                
+                <div class="integration-step">
+                    <h4>For Claude account admins/owners</h4>
+                    <ol>
+                        <li>Go to <a href="https://claude.ai/settings/connectors" target="_blank">claude.ai/settings/connectors</a></li>
+                        <li>Click the "Browse connectors" button</li>
+                        <li>Find the Apify connector and click on it</li>
+                        <li>Click the "Add to your team" button</li>
+                        <li>Paste in your Integration URL from below</li>
+                        <li>Click "Add"</li>
+                    </ol>
+                </div>
+                
+                <div class="integration-step">
+                    <h4>Integration URL</h4>
+                    <div class="code-block">
+                        <pre><code id="claudeUrl" class="language-bash">${document.getElementById('mcpServerUrl').textContent}</code></pre>
+                        <button class="copy-code-btn" onclick="copyCode(this)">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="warning-box">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    <p><strong>Note:</strong> The added integration will be available to all users in the Claude organization, but only you will be able to see actions you add to this MCP server.</p>
+                </div>
+                
+                <div class="integration-step">
+                    <h4>For Claude account members</h4>
+                    <p>Once your Claude account admin/owner has completed the steps above:</p>
+                    <ol>
+                        <li>Go to <a href="https://claude.ai/settings/connectors" target="_blank">claude.ai/settings/connectors</a></li>
+                        <li>You should see the Apify integration that your admin added and named</li>
+                        <li>Next to that integration, click "Connect" - you'll be taken to an OAuth screen</li>
+                        <li>Once you've authorized the connection, you can use your Apify MCP tools in Claude</li>
+                        <li>View, enable, and disable Claude's access to tools with the "Search and Tools" button in chat</li>
+                    </ol>
+                </div>
+            `
+        },
+        'claude-code': {
+            title: 'Connect to Claude Code',
+            content: `
+                <div class="integration-step">
+                    <p>Use Apify MCP directly from Claude Code with a simple command-line setup. Enable your AI assistant to perform real-world tasks through a secure connection without leaving your development environment.</p>
+                </div>
+                
+                <div class="integration-step">
+                    <h4>Installing Claude Code</h4>
+                    <p>First, <a href="https://docs.anthropic.com/en/docs/claude-code" target="_blank">set up Claude Code if you haven't already</a></p>
+                </div>
+                
+                <div class="integration-step">
+                    <h4>Configuring Apify MCP in Claude Code</h4>
+                    <ol>
+                        <li>Open your terminal</li>
+                        <li>Run the following command to add this Apify MCP server:</li>
+                    </ol>
+                    <div class="code-block">
+                        <pre><code class="language-bash">claude mcp add apify ${document.getElementById('mcpServerUrl').textContent} -t http -H "Authorization: Bearer ${useToken.checked ? '••••••••' : 'YOUR_API_KEY'}"</code></pre>
+                        <button class="copy-code-btn" onclick="copyCode(this)">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="integration-step">
+                    <h4>API Key</h4>
+                    <p>The API key for this MCP server.</p>
+                    <div class="code-block">
+                        <pre><code>${useToken.checked ? '••••••••••••••••••••' : 'YOUR_API_KEY_HERE'}</code></pre>
+                        <button class="copy-code-btn" onclick="copyCode(this)">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="integration-step">
+                    <h4>Using MCP tools in Claude Code</h4>
+                    <ol>
+                        <li>Start a new conversation with Claude Code</li>
+                        <li>Claude will automatically have access to your Apify MCP tools</li>
+                        <li>Ask Claude to use them to automate your workflows!</li>
+                    </ol>
+                </div>
+            `
+        },
+        'cursor': {
+            title: 'Connect to Cursor',
+            content: `
+                <div class="integration-step">
+                    <p>Use tools directly from Cursor IDE with Apify MCP. Enable your AI assistant to perform real-world tasks through a simple, secure connection without leaving your coding environment.</p>
+                </div>
+                
+                <div class="integration-step">
+                    <h4>Configuring Apify MCP in Cursor</h4>
+                    <p>First try and click on the "Add to Cursor" button below to automatically have it configured. If that doesn't work or you need to modify the installation follow the directions below.</p>
+                    
+                    <button class="btn-secondary" style="margin: 1rem 0;">Add to Cursor</button>
+                    
+                    <ol>
+                        <li>Open Cursor settings (⌘+⌘+J)</li>
+                        <li>Navigate to the "MCP Tools" tab and click "New MCP Server"</li>
+                        <li>Copy/paste the following JSON configuration from below, then hit CMD+S or CTRL+S to save.</li>
+                    </ol>
+                </div>
+                
+                <div class="warning-box">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    <p><strong>Caution:</strong> Treat your MCP server URL like a password! It can be used to run tools attached to this server and access your data.</p>
+                </div>
+                
+                <div class="code-block">
+                    <pre><code class="language-json">{
+  "mcpServers": {
+    "Apify": {
+      "url": "${document.getElementById('mcpServerUrl').textContent}"
+    }
+  }
+}</code></pre>
+                    <button class="copy-code-btn" onclick="copyCode(this)">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="integration-step">
+                    <h4>Server URL</h4>
+                    <p>The URL for this MCP server.</p>
+                    <div class="code-block">
+                        <pre><code>${document.getElementById('mcpServerUrl').textContent}</code></pre>
+                        <button class="copy-code-btn" onclick="copyCode(this)">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <p style="margin-top: 1rem;">To use Apify MCP within Cursor, set the chat to Agent mode</p>
+            `
+        },
+        'vscode': {
+            title: 'Connect to Visual Studio Code',
+            content: `
+                <div class="integration-step">
+                    <p>Use tools directly inside of Visual Studio Code with Apify MCP. Enable your AI assistant to perform real-world tasks through a simple, secure connection without leaving your coding environment.</p>
+                </div>
+                
+                <div class="warning-box">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    <p><strong>Important:</strong> You must have GitHub Copilot enabled and set to 'Agent' mode in Visual Studio Code for Apify MCP to work properly.</p>
+                </div>
+                
+                <div class="integration-step">
+                    <h4>Configuring Apify MCP in Visual Studio Code</h4>
+                    <ol>
+                        <li>Open the Visual Studio Code command palette (⌘+⌘+P on Mac, Ctrl+Shift+P on Windows)</li>
+                        <li>Type "MCP: Add Server..." and press Enter</li>
+                        <li>Choose "HTTP (HTTP or Server-Sent Events)" and press Enter</li>
+                        <li>Paste the server URL from below into the "Server URL" field and press Enter</li>
+                        <li>Give the server a name and press Enter</li>
+                        <li>Make sure that GitHub Copilot is set to "Agent" mode</li>
+                        <li>Ask GitHub Copilot to use the tools from your server!</li>
+                    </ol>
+                </div>
+                
+                <div class="warning-box">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    <p><strong>Caution:</strong> Treat your MCP server URL like a password! It can be used to run tools attached to this server and access your data.</p>
+                </div>
+                
+                <div class="integration-step">
+                    <h4>Server URL</h4>
+                    <p>The URL for this MCP server.</p>
+                    <div class="code-block">
+                        <pre><code>${document.getElementById('mcpServerUrl').textContent}</code></pre>
+                        <button class="copy-code-btn" onclick="copyCode(this)">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            `
+        },
+        'windsurf': {
+            title: 'Connect to Windsurf',
+            content: `
+                <div class="integration-step">
+                    <p>Use Apify MCP directly from Windsurf IDE with Apify MCP. Enable your AI assistant to perform real-world tasks through a simple, secure connection without leaving your coding environment.</p>
+                </div>
+                
+                <div class="integration-step">
+                    <h4>Configuring Apify MCP in Windsurf</h4>
+                    <ol>
+                        <li>Open Windsurf settings (⌘+,)</li>
+                        <li>Navigate to the "Cascade" tab and click "Add Server"</li>
+                        <li>Select "Add custom server +"</li>
+                        <li>Add the following JSON configuration, replacing the placeholder URL with your MCP URL from below</li>
+                    </ol>
+                </div>
+                
+                <div class="warning-box">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    <p><strong>Caution:</strong> Treat your MCP server URL like a password! It can be used to run tools attached to this server and access your data.</p>
+                </div>
+                
+                <div class="code-block">
+                    <pre><code class="language-json">{
+  "mcpServers": {
+    "Apify": {
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "${document.getElementById('mcpServerUrl').textContent}",
+        "--transport",
+        "http-only"
+      ],
+      "working_directory": null,
+      "start_on_launch": true
+    }
+  }
+}</code></pre>
+                    <button class="copy-code-btn" onclick="copyCode(this)">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="integration-step">
+                    <h4>Server URL</h4>
+                    <p>The URL for this MCP server.</p>
+                    <div class="code-block">
+                        <pre><code>${document.getElementById('mcpServerUrl').textContent}</code></pre>
+                        <button class="copy-code-btn" onclick="copyCode(this)">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            `
+        },
+        'warp': {
+            title: 'Connect to Warp',
+            content: `
+                <div class="integration-step">
+                    <p>Use Apify MCP with Warp. Enable your AI assistant to perform real-world tasks through a simple, secure connection without leaving your coding environment.</p>
+                </div>
+                
+                <div class="integration-step">
+                    <h4>Configuring Apify MCP in Warp</h4>
+                    <ol>
+                        <li>Open Warp's MCP Server settings</li>
+                        <li>Click "Add Server"</li>
+                        <li>Add the following JSON configuration, replacing the placeholder URL with your MCP URL from below</li>
+                        <li>Save and click 'Start'</li>
+                    </ol>
+                </div>
+                
+                <div class="warning-box">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    <p><strong>Caution:</strong> Treat your MCP server URL like a password! It can be used to run tools attached to this server and access your data.</p>
+                </div>
+                
+                <div class="code-block">
+                    <pre><code class="language-json">{
+  "mcpServers": {
+    "Apify": {
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "${document.getElementById('mcpServerUrl').textContent}",
+        "--transport",
+        "http-only"
+      ],
+      "working_directory": null,
+      "start_on_launch": true
+    }
+  }
+}</code></pre>
+                    <button class="copy-code-btn" onclick="copyCode(this)">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="integration-step">
+                    <h4>Server URL</h4>
+                    <p>The URL for this MCP server.</p>
+                    <div class="code-block">
+                        <pre><code>${document.getElementById('mcpServerUrl').textContent}</code></pre>
+                        <button class="copy-code-btn" onclick="copyCode(this)">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            `
+        },
+        'anthropic-api': {
+            title: 'Connect to Anthropic API',
+            content: `
+                <div class="integration-step">
+                    <p>Connect Anthropic's Messages API to your Apify MCP server</p>
+                </div>
+                
+                <div class="integration-step">
+                    <h4>Get an Anthropic API Key</h4>
+                    <p>First, make sure that you have a valid Anthropic API key.</p>
+                    <p>To view or generate a new Anthropic API Key, go to the <a href="https://console.anthropic.com/api" target="_blank">Anthropic developer console API Keys page</a></p>
+                    <p>Export your API key as an environment variable:</p>
+                    <div class="code-block">
+                        <pre><code class="language-bash">export ANTHROPIC_API_KEY="sk-..."</code></pre>
+                        <button class="copy-code-btn" onclick="copyCode(this)">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                        </svg>
+                    </button>
+                    </div>
+                </div>
+                
+                <div class="integration-step">
+                    <h4>MCP server information</h4>
+                    <p><strong>MCP Server URL</strong></p>
+                    <p>The URL for this MCP server.</p>
+                    <div class="code-block">
+                        <pre><code>${document.getElementById('mcpServerUrl').textContent}</code></pre>
+                        <button class="copy-code-btn" onclick="copyCode(this)">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <p style="margin-top: 1rem;"><strong>API Key</strong></p>
+                    <p>The API key for this MCP server.</p>
+                    <p>Pass this in a Authorization: Bearer {apiKey} header when calling the Apify MCP server.</p>
+                    <div class="code-block">
+                        <pre><code>${useToken.checked ? '••••••••••••••••••••' : 'YOUR_API_KEY_HERE'}</code></pre>
+                        <button class="copy-code-btn" onclick="copyCode(this)">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="integration-step">
+                    <h4>Using Anthropic's Messages API</h4>
+                    <p><a href="https://docs.anthropic.com/claude/docs/messages-api" target="_blank">Anthropic's Messages API</a> can be used to call Apify MCP from anywhere.</p>
+                    
+                    <h4>Code Example</h4>
+                    <div class="code-block">
+                        <pre><code class="language-bash">curl https://api.anthropic.com/v1/messages \\
+-H "Content-Type: application/json" \\
+-H "X-API-Key: $ANTHROPIC_API_KEY" \\
+-H "anthropic-version: 2023-06-01" \\
+-H "anthropic-beta: mcp-client-2025-04-04" \\
+-d '{
+  "model": "claude-sonnet-4-20250514",
+  "max_tokens": 1000,
+  "messages": [{"role": "user", "content": "What tools do you have available?"}],
+  "mcp_servers": [
+    {
+      "type": "url",
+      "url": "${document.getElementById('mcpServerUrl').textContent}",
+      "name": "apify",
+      "authorization_token": "${useToken.checked ? '••••••••' : 'YOUR_API_KEY'}"
+    }
+  ]
+}'</code></pre>
+                        <button class="copy-code-btn" onclick="copyCode(this)">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                        </svg>
+                    </button>
+                    </div>
+                </div>
+            `
+        },
+        'openai-api': {
+            title: 'Connect to OpenAI API',
+            content: `
+                <div class="integration-step">
+                    <p>Connect OpenAI's Responses API to your Apify MCP server</p>
+                </div>
+                
+                <div class="integration-step">
+                    <h4>Get an OpenAI API Key</h4>
+                    <p>First, make sure that you have a valid OpenAI API key.</p>
+                    <p>To view or generate a new OpenAI API Key, go to the <a href="https://platform.openai.com/api-keys" target="_blank">OpenAI platform API Keys page</a></p>
+                    <p>Export your API key as an environment variable:</p>
+                    <div class="code-block">
+                        <pre><code class="language-bash">export OPENAI_API_KEY="sk-..."</code></pre>
+                        <button class="copy-code-btn" onclick="copyCode(this)">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                        </svg>
+                    </button>
+                    </div>
+                </div>
+                
+                <div class="integration-step">
+                    <h4>MCP server information</h4>
+                    <p><strong>MCP Server URL</strong></p>
+                    <p>The URL for this MCP server.</p>
+                    <div class="code-block">
+                        <pre><code>${document.getElementById('mcpServerUrl').textContent}</code></pre>
+                        <button class="copy-code-btn" onclick="copyCode(this)">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <p style="margin-top: 1rem;"><strong>API Key</strong></p>
+                    <p>The API key for this MCP server.</p>
+                    <p>Pass this in a Authorization: Bearer {apiKey} header when calling the Apify MCP server.</p>
+                    <div class="code-block">
+                        <pre><code>${useToken.checked ? '••••••••••••••••••••' : 'YOUR_API_KEY_HERE'}</code></pre>
+                        <button class="copy-code-btn" onclick="copyCode(this)">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="integration-step">
+                    <h4>Using OpenAI's Responses API</h4>
+                    <p><a href="https://platform.openai.com/docs/api-reference/responses" target="_blank">OpenAI's Responses API</a> can be used to call Apify MCP from anywhere.</p>
+                    
+                    <h4>Code Example</h4>
+                    <div class="code-block">
+                        <pre><code class="language-bash">curl --location 'https://api.openai.com/v1/responses' \\
+--header 'Content-Type: application/json' \\
+--header "Authorization: Bearer $OPENAI_API_KEY" \\
+--data '{
+  "model": "gpt-4.1",
+  "tools": [
+    {
+      "type": "mcp",
+      "server_label": "apify",
+      "server_url": "${document.getElementById('mcpServerUrl').textContent}",
+      "require_approval": "never",
+      "headers": {
+        "Authorization": "Bearer ${useToken.checked ? '••••••••' : 'YOUR_API_KEY'}"
+      }
+    }
+  ],
+  "input": "List all of my available tools",
+  "tool_choice": "required"
+}'</code></pre>
+                        <button class="copy-code-btn" onclick="copyCode(this)">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                        </svg>
+                    </button>
+                    </div>
+                </div>
+            `
+        }
+    };
+    
+    const details = integrationDetails[integration];
+    if (details) {
+        title.textContent = details.title;
+        content.innerHTML = details.content;
+        modal.classList.add('active');
+        
+        // Apply Prism highlighting to all code blocks in the modal
+        if (window.Prism) {
+            setTimeout(() => {
+                content.querySelectorAll('pre code').forEach(block => {
+                    Prism.highlightElement(block);
+                });
+            }, 10);
+        }
+    }
+}
+
+window.closeIntegrationModal = function() {
+    const modal = document.getElementById('integrationModalOverlay');
+    modal.classList.remove('active');
+}
+
+// Update the MCP server URL dynamically
+function updateConnectionsPage() {
+    const urlElement = document.getElementById('mcpServerUrl');
+    if (urlElement) {
+        urlElement.textContent = generateMcpUrl();
+    }
+    
+    // Update SDK examples with actual URL
+    const pythonExample = document.getElementById('pythonExample');
+    if (pythonExample) {
+        pythonExample.textContent = `import mcp
+from mcp.client.streamable_http import streamablehttp_client
+
+async def main():
+    url = "${generateMcpUrl()}"
+    async with streamablehttp_client(url) as (read_stream, write_stream):
+        async with mcp.ClientSession(read_stream, write_stream) as session:
+            await session.initialize()
+            tools_result = await session.list_tools()
+            print("Available tools:", [t.name for t in tools_result.tools])`.trim();
+        // Re-highlight with Prism
+        if (window.Prism) {
+            Prism.highlightElement(pythonExample);
+        }
+    }
+    
+    const typescriptExample = document.getElementById('typescriptExample');
+    if (typescriptExample) {
+        typescriptExample.textContent = `import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk";
+
+const serverUrl = "${generateMcpUrl()}";
+const transport = new StreamableHTTPClientTransport(serverUrl);
+
+const client = new Client({
+    name: "My App",
+    version: "1.0.0"
+});
+
+await client.connect(transport);
+const tools = await client.listTools();
+console.log("Available tools:", tools.map(t => t.name));`.trim();
+        // Re-highlight with Prism
+        if (window.Prism) {
+            Prism.highlightElement(typescriptExample);
+        }
+    }
+}
+
+// Call updateConnectionsPage when switching to Connections tab
+const originalSwitchTab = window.switchTab;
+window.switchTab = function(tabName) {
+    originalSwitchTab(tabName);
+    if (tabName === 'connections') {
+        updateConnectionsPage();
+    }
+};

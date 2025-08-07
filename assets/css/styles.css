@@ -1142,22 +1142,153 @@ body {
 }
 
 .code-block {
-    background-color: var(--muted);
-    padding: 0.75rem;
-    padding-right: 3rem;
-    border-radius: var(--radius);
-    font-size: 0.875rem;
-    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-    border: 1px solid var(--border);
-    overflow-x: auto;
-    overflow-wrap: break-word;
-    word-wrap: break-word;
-    word-break: break-all;
-    white-space: pre-wrap;
-    width: 100%;
-    max-width: 100%;
     position: relative;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 0.75rem;
+    width: 100%;
     box-sizing: border-box;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+/* Override Prism.js theme for better integration */
+.code-block pre[class*="language-"] {
+    margin: 0;
+    padding: 1rem;
+    padding-right: 3.5rem;
+    background: #f8f9fa;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    overflow-x: auto;
+    border: none;
+}
+
+.code-block code[class*="language-"] {
+    background: none;
+    text-shadow: none;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Courier New', monospace;
+    color: #2d3748;
+}
+
+/* Light theme syntax colors */
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+    color: #708090;
+}
+
+.token.punctuation {
+    color: #999;
+}
+
+.token.property,
+.token.tag,
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol,
+.token.deleted {
+    color: #d73a49;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+    color: #22863a;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string {
+    color: #e36209;
+}
+
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+    color: #005cc5;
+}
+
+.token.function,
+.token.class-name {
+    color: #6f42c1;
+}
+
+.token.regex,
+.token.important,
+.token.variable {
+    color: #e36209;
+}
+
+/* Dark mode support */
+.dark .code-block pre[class*="language-"] {
+    background: #1e293b;
+}
+
+.dark .code-block code[class*="language-"] {
+    color: #e2e8f0;
+}
+
+.dark .token.comment,
+.dark .token.prolog,
+.dark .token.doctype,
+.dark .token.cdata {
+    color: #94a3b8;
+}
+
+.dark .token.punctuation {
+    color: #cbd5e1;
+}
+
+.dark .token.property,
+.dark .token.tag,
+.dark .token.boolean,
+.dark .token.number,
+.dark .token.constant,
+.dark .token.symbol,
+.dark .token.deleted {
+    color: #f87171;
+}
+
+.dark .token.selector,
+.dark .token.attr-name,
+.dark .token.string,
+.dark .token.char,
+.dark .token.builtin,
+.dark .token.inserted {
+    color: #86efac;
+}
+
+.dark .token.operator,
+.dark .token.entity,
+.dark .token.url,
+.dark .language-css .token.string,
+.dark .style .token.string {
+    color: #fbbf24;
+}
+
+.dark .token.atrule,
+.dark .token.attr-value,
+.dark .token.keyword {
+    color: #60a5fa;
+}
+
+.dark .token.function,
+.dark .token.class-name {
+    color: #c084fc;
+}
+
+.dark .token.regex,
+.dark .token.important,
+.dark .token.variable {
+    color: #fb923c;
 }
 
 .copy-btn-inline {
@@ -1843,19 +1974,10 @@ body {
         max-width: 100%;
     }
     
-    .code-block {
+    .code-block pre[class*="language-"] {
         padding: 0.75rem;
-        padding-right: 3.5rem;
-        font-size: 0.8125rem;
-        line-height: 1.4;
-        max-width: 100%;
-        width: 100%;
-        overflow-x: hidden;
-        overflow-wrap: break-word;
-        word-wrap: break-word;
-        word-break: break-all;
-        white-space: pre-wrap;
-        box-sizing: border-box;
+        padding-right: 3rem;
+        font-size: 0.875rem;
     }
     
     .copy-btn-inline {
@@ -1926,18 +2048,10 @@ body {
         padding: 1rem 0.5rem;
     }
     
-    .code-block {
-        font-size: 0.8125rem;
+    .code-block pre[class*="language-"] {
         padding: 0.625rem;
-        padding-right: 3rem;
-        overflow-x: hidden;
-        overflow-wrap: break-word;
-        word-wrap: break-word;
-        word-break: break-all;
-        white-space: pre-wrap;
-        max-width: 100%;
-        width: 100%;
-        box-sizing: border-box;
+        padding-right: 2.75rem;
+        font-size: 0.8125rem;
     }
     
     .copy-btn-inline {
@@ -2131,5 +2245,455 @@ body {
     padding: 2rem;
     text-align: center;
     color: var(--muted-foreground);
+}
+
+/* Connections Page Styles */
+.connections-container {
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: 1.5rem;
+}
+
+.connection-section {
+    margin-bottom: 2rem;
+    width: 100%;
+    box-sizing: border-box;
+    max-width: 100%;
+}
+
+.section-header {
+    margin-bottom: 1rem;
+}
+
+.section-header h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--foreground);
+    margin-bottom: 0.25rem;
+}
+
+.section-header p {
+    font-size: 0.8125rem;
+    color: var(--muted-foreground);
+}
+
+/* URL Display */
+.url-display {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem;
+}
+
+.url-field {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.5rem 0.75rem;
+}
+
+.url-field span {
+    flex: 1;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 0.875rem;
+    color: var(--foreground);
+    word-break: break-all;
+}
+
+.copy-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--muted-foreground);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 2.5rem;
+    min-height: 2.5rem;
+}
+
+.copy-btn:hover {
+    background: var(--card-hover);
+    border-color: var(--primary);
+    color: var(--primary);
+    transform: scale(1.05);
+}
+
+.copy-btn.copied {
+    background: var(--success-light);
+    border-color: var(--success);
+    color: var(--success);
+}
+
+.copy-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Integration Grid */
+.integration-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 0.75rem;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.integration-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.integration-card:hover {
+    border-color: var(--primary);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+}
+
+.integration-icon {
+    width: 36px;
+    height: 36px;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--muted);
+    border-radius: var(--radius);
+    position: relative;
+    overflow: hidden;
+}
+
+.integration-icon img {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+}
+
+.integration-icon::after {
+    content: attr(data-fallback);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted-foreground);
+    display: none;
+}
+
+.integration-icon img[src*="error"], .integration-icon img:not([src]) {
+    display: none;
+}
+
+.integration-icon img[src*="error"] + ::after, 
+.integration-icon img:not([src]) + ::after {
+    display: block;
+}
+
+.integration-card h3 {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--foreground);
+    margin: 0;
+    line-height: 1.2;
+}
+
+.integration-card p {
+    display: none;
+}
+
+.btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.5rem 1rem;
+    background: var(--secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--secondary-foreground);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+    background: var(--secondary-hover);
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+/* SDK Tabs */
+.sdk-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.sdk-tab {
+    padding: 0.75rem 1.5rem;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--muted-foreground);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-bottom: -1px;
+}
+
+.sdk-tab:hover {
+    color: var(--foreground);
+}
+
+.sdk-tab.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+}
+
+.sdk-content {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.sdk-panel {
+    display: none;
+}
+
+.sdk-panel.active {
+    display: block;
+}
+
+.sdk-panel h4 {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--foreground);
+    margin-bottom: 0.75rem;
+}
+
+/* Platform Tabs */
+.platform-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.platform-tab {
+    padding: 0.5rem 1rem;
+    background: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--muted-foreground);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.platform-tab:hover {
+    background: var(--secondary);
+    color: var(--foreground);
+}
+
+.platform-tab.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: var(--primary-foreground);
+}
+
+.platform-content {
+    margin-top: 1rem;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.platform-panel {
+    display: none;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.platform-panel.active {
+    display: block;
+}
+
+.platform-panel h4 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--foreground);
+    margin-bottom: 0.75rem;
+}
+
+
+.code-block pre {
+    margin: 0;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 0.875rem;
+    line-height: 1.4;
+    color: var(--foreground);
+    overflow-x: auto;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.code-block code {
+    display: block;
+    white-space: pre;
+    margin: 0;
+    padding: 0;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+}
+
+.copy-code-btn {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--muted-foreground);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 2.5rem;
+    min-height: 2.5rem;
+}
+
+.copy-code-btn:hover {
+    background: var(--card-hover);
+    border-color: var(--primary);
+    color: var(--primary);
+    transform: scale(1.05);
+}
+
+.copy-code-btn.copied {
+    background: var(--success-light);
+    border-color: var(--success);
+    color: var(--success);
+}
+
+.copy-code-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Integration Modal */
+.integration-modal {
+    max-width: 48rem;
+}
+
+.integration-modal .modal-body {
+    padding: 2rem;
+}
+
+.integration-step {
+    margin-bottom: 1rem;
+}
+
+.integration-step h4 {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--foreground);
+    margin-bottom: 0.375rem;
+}
+
+.integration-step p {
+    font-size: 0.8125rem;
+    color: var(--muted-foreground);
+    line-height: 1.4;
+}
+
+.integration-step ol {
+    margin: 0.5rem 0;
+    padding-left: 1.25rem;
+}
+
+.integration-step li {
+    font-size: 0.8125rem;
+    color: var(--foreground);
+    line-height: 1.5;
+    margin-bottom: 0.375rem;
+}
+
+.warning-box {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background: var(--accent-light);
+    border: 1px solid var(--accent);
+    border-radius: var(--radius);
+    margin: 0.75rem 0;
+}
+
+.warning-box svg {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    color: var(--accent);
+}
+
+.warning-box p {
+    font-size: 0.8125rem;
+    color: var(--foreground);
+    line-height: 1.4;
+}
+
+.mt-3 {
+    margin-top: 0.75rem;
+}
+
+/* Responsive adjustments for Connections page */
+@media (max-width: 768px) {
+    .connections-container {
+        padding: 1rem;
+    }
+    
+    .integration-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .sdk-tabs {
+        flex-wrap: wrap;
+    }
+    
+    .platform-tabs {
+        flex-wrap: wrap;
+    }
+    
+    .url-field {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .copy-btn {
+        width: auto;
+        justify-content: center;
+    }
 }
 
