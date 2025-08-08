@@ -155,7 +155,7 @@ function init() {
     renderToolsGrid();
     updateServerConfig();
     ensureA11yAttributes();
-    updateConnectionsPage(); // Initialize code examples with proper formatting
+    updateIntegrationsPage(); // Initialize code examples with proper formatting
     // Note: renderActorsGrid() is not called here since modal will load data when opened
 }
 
@@ -947,7 +947,7 @@ window.debugCloseModal = function() {
     console.log('=== END DEBUG ===');
 }
 
-// Connections page functions
+// Integrations page functions
 window.copyToClipboard = function(elementId, button) {
     const element = document.getElementById(elementId);
     
@@ -1854,7 +1854,7 @@ window.closeIntegrationModal = function() {
 }
 
 // Update the MCP server URL dynamically
-function updateConnectionsPage() {
+function updateIntegrationsPage() {
     const urlElement = document.getElementById('mcpServerUrl');
     if (urlElement) {
         urlElement.textContent = generateMcpUrl();
@@ -1898,11 +1898,11 @@ console.log("Available tools:", tools.map(t => t.name));`.trim();
     }
 }
 
-// Call updateConnectionsPage when switching to Connections tab
+// Call updateIntegrationsPage when switching to Integrations tab
 const originalSwitchTab = window.switchTab;
 window.switchTab = function(tabName) {
     originalSwitchTab(tabName);
-    if (tabName === 'connections') {
-        updateConnectionsPage();
+    if (tabName === 'integrations') {
+        updateIntegrationsPage();
     }
 };

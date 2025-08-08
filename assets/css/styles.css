@@ -2250,8 +2250,8 @@ body {
     color: var(--muted-foreground);
 }
 
-/* Connections Page Styles */
-.connections-container {
+/* Integrations Page Styles */
+.integrations-container {
     width: 100%;
     max-width: 72rem;
     margin: 0 auto;
@@ -2635,9 +2635,9 @@ body {
     margin-top: 0.75rem;
 }
 
-/* Responsive adjustments for Connections page */
+/* Responsive adjustments for Integrations page */
 @media (max-width: 768px) {
-    .connections-container {
+    .integrations-container {
         gap: 1.5rem;
     }
     
@@ -2791,8 +2791,8 @@ body {
 .tab-button:hover, .tab-button.active { transform: none !important; }
 .tab-button.active { color: var(--primary) !important; background: var(--card-hover) !important; border-color: rgba(30,163,77,0.35) !important; }
 
-/* Ensure Connections tab content uses same max width as Configuration */
-#connections.tab-content {
+/* Ensure Integrations tab content uses same max width as Configuration */
+#integrations.tab-content {
     width: 100% !important;
     max-width: 72rem !important;
     margin: 0 auto !important;
