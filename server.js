@@ -1,10 +1,8 @@
-require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const helmet = require('helmet');
 const compression = require('compression');
 const rateLimit = require('express-rate-limit');
-const { ApifyClient } = require('apify-client');
 
 // For Node.js versions that don't have fetch globally
 const fetch = require('node-fetch');
@@ -12,15 +10,7 @@ const fetch = require('node-fetch');
 const app = express();
 const port = process.env.PORT || 3000;
 
-// APIFY token setup (graceful if missing)
-const hasApifyToken = Boolean(process.env.APIFY_TOKEN);
-if (!hasApifyToken) {
-    console.warn('⚠️  APIFY_TOKEN is not set. UI will load, but /api routes will return 503 until configured.');
-}
-
-const client = hasApifyToken
-    ? new ApifyClient({ token: process.env.APIFY_TOKEN })
-    : null;
+// No APIFY token required: endpoints use public Store API
 
 // Middleware
 app.set('trust proxy', 1);
@@ -87,9 +77,6 @@ app.use('/assets', express.static(path.join(__dirname, 'assets'), {
 // Search endpoint for Apify store
 app.get('/api/search/actors', async (req, res) => {
     try {
-        if (!hasApifyToken) {
-            return res.status(503).json({ error: 'Server not configured', message: 'APIFY_TOKEN is required for this endpoint.' });
-        }
         const { query, limit = 50, offset = 0, pricingModel } = req.query;
         
         if (!query || query.trim().length < 2) {
@@ -116,8 +103,7 @@ app.get('/api/search/actors', async (req, res) => {
         const requestOptions = {
             method: "GET",
             headers: {
-                "Accept": "application/json",
-                "Authorization": `Bearer ${process.env.APIFY_TOKEN}`
+                "Accept": "application/json"
             },
             redirect: "follow"
         };
@@ -178,9 +164,6 @@ app.get('/api/search/actors', async (req, res) => {
 // Popular actors endpoint (no search, sorted by usage/popularity)
 app.get('/api/popular/actors', async (req, res) => {
     try {
-        if (!hasApifyToken) {
-            return res.status(503).json({ error: 'Server not configured', message: 'APIFY_TOKEN is required for this endpoint.' });
-        }
         const { limit = 20, offset = 0, pricingModel } = req.query;
 
         // Cache layer
@@ -199,8 +182,7 @@ app.get('/api/popular/actors', async (req, res) => {
         const requestOptions = {
             method: "GET",
             headers: {
-                "Accept": "application/json",
-                "Authorization": `Bearer ${process.env.APIFY_TOKEN}`
+                "Accept": "application/json"
             },
             redirect: "follow"
         };
@@ -255,47 +237,7 @@ app.get('/api/popular/actors', async (req, res) => {
     }
 });
 
-// Get actor details
-app.get('/api/actors/:userId/:actorName', async (req, res) => {
-    try {
-        if (!hasApifyToken) {
-            return res.status(503).json({ error: 'Server not configured', message: 'APIFY_TOKEN is required for this endpoint.' });
-        }
-        const { userId, actorName } = req.params;
-        const actorId = `${userId}/${actorName}`;
-        
-        const actor = await client.actor(actorId).get();
-        
-        if (!actor) {
-            return res.status(404).json({ error: 'Actor not found' });
-        }
-
-        const transformedActor = {
-            id: actor.id,
-            title: actor.title || actor.name,
-            path: `${actor.username}/${actor.name}`,
-            description: actor.description || '',
-            icon: actor.pictureUrl || null,
-            pictureUrl: actor.pictureUrl || null,
-            userPictureUrl: actor.userPictureUrl || null,
-            username: actor.username,
-            name: actor.name,
-            stats: {
-                totalRuns: actor.stats?.totalRuns || 0,
-                lastRunFinishedAt: actor.stats?.lastRunFinishedAt
-            }
-        };
-
-        res.json(transformedActor);
-
-    } catch (error) {
-        console.error('Actor fetch error:', error);
-        res.status(500).json({ 
-            error: 'Failed to fetch actor details',
-            message: error.message 
-        });
-    }
-});
+// Detailed actor endpoint removed: only public store search/popular endpoints are supported
 
 // Serve the main page
 app.get('/', (req, res) => {

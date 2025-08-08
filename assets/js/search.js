@@ -61,32 +61,7 @@ class ApifySearch {
         }
     }
 
-    async getActorDetails(userId, actorName) {
-        const cacheKey = `details-${userId}/${actorName}`;
-        
-        if (this.searchCache.has(cacheKey)) {
-            return this.searchCache.get(cacheKey);
-        }
-
-        try {
-            const response = await fetch(`/api/actors/${encodeURIComponent(userId)}/${encodeURIComponent(actorName)}`);
-            
-            if (!response.ok) {
-                throw new Error(`Failed to fetch actor: ${response.status}`);
-            }
-
-            const actor = await response.json();
-            
-            // Cache for 10 minutes
-            this.searchCache.set(cacheKey, actor);
-            setTimeout(() => this.searchCache.delete(cacheKey), 10 * 60 * 1000);
-            
-            return actor;
-        } catch (error) {
-            console.error('Actor fetch error:', error);
-            return null;
-        }
-    }
+    // Removed getActorDetails: detailed actor endpoint no longer exists
 
     debouncedSearch(query, callback, delay = 300) {
         if (this.searchTimeout) {

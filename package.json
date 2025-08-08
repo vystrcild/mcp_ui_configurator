@@ -19,9 +19,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "apify-client": "^2.12.6",
     "compression": "^1.7.4",
-    "dotenv": "^17.2.1",
     "express": "^5.1.0",
     "express-rate-limit": "^7.4.0",
     "helmet": "^7.2.0",
