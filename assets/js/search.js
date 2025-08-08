@@ -20,38 +20,70 @@ class ApifySearch {
 
         try {
             this.isSearching = true;
-            const response = await fetch(`/api/search/actors?query=${encodeURIComponent(query.trim())}&limit=${limit}&offset=${offset}`);
-            
-            if (!response.ok) {
-                throw new Error(`Search failed: ${response.status}`);
-            }
+            const storeParams = new URLSearchParams({
+                search: query.trim(),
+                limit: String(limit),
+                offset: String(offset),
+                sortBy: 'relevance'
+            });
+            const response = await fetch(`https://api.apify.com/v2/store?${storeParams.toString()}`, {
+                method: 'GET',
+                headers: { 'Accept': 'application/json' }
+            });
+            if (!response.ok) throw new Error(`Search failed: ${response.status}`);
 
-            const results = await response.json();
-            
-            // Debug: Log first few items to see what pricingModel values we're getting
+            const raw = await response.json();
+            const paginatedItems = raw?.data?.items || [];
+            const transformed = paginatedItems.map(actor => {
+                const ratingCandidates = [actor.actorReviewRating, actor.stats?.avgRating, actor.avgRating, actor.rating];
+                const firstFinite = ratingCandidates.map(Number).find(n => Number.isFinite(n));
+                const normalizedRating = Number.isFinite(firstFinite) ? firstFinite : null;
+                return {
+                    id: actor.id,
+                    title: actor.title || actor.name,
+                    path: `${actor.username}/${actor.name}`,
+                    description: actor.description || '',
+                    icon: actor.pictureUrl || null,
+                    pictureUrl: actor.pictureUrl || null,
+                    userPictureUrl: actor.userPictureUrl || null,
+                    username: actor.username,
+                    name: actor.name,
+                    pricingModel: actor.currentPricingInfo?.pricingModel,
+                    actorReviewRating: normalizedRating,
+                    stats: {
+                        totalUsers: actor.stats?.totalUsers || 0,
+                        lastRunFinishedAt: actor.stats?.lastRunFinishedAt,
+                        avgRating: normalizedRating
+                    }
+                };
+            });
+
+            const results = {
+                items: transformed,
+                total: raw?.data?.total || transformed.length,
+                count: transformed.length,
+                limit,
+                offset
+            };
+
             if (typeof window !== 'undefined' && window.__DEBUG__ !== false) console.log('API Response sample:', results.items.slice(0, 3).map(actor => ({
                 title: actor.title,
-                pricingModel: actor.pricingModel
+                pricingModel: actor.pricingModel,
+                actorReviewRating: actor.actorReviewRating,
+                totalUsers: actor.stats?.totalUsers
             })));
-            
-            // Filter results to only include allowed pricing models
+
             const allowedPricingModels = ['FREE', 'PRICE_PER_DATASET_ITEM', 'PAY_PER_EVENT'];
             const filteredResults = {
                 ...results,
-                items: results.items.filter(actor => 
-                    allowedPricingModels.includes(actor.pricingModel)
-                ),
-                count: results.items.filter(actor => 
-                    allowedPricingModels.includes(actor.pricingModel)
-                ).length
+                items: results.items.filter(actor => allowedPricingModels.includes(actor.pricingModel)),
+                count: results.items.filter(actor => allowedPricingModels.includes(actor.pricingModel)).length
             };
-            
+
             if (typeof window !== 'undefined' && window.__DEBUG__ !== false) console.log(`Filtered ${results.items.length} items down to ${filteredResults.items.length}`);
-            
-            // Cache filtered results for 5 minutes
+
             this.searchCache.set(cacheKey, filteredResults);
             setTimeout(() => this.searchCache.delete(cacheKey), 5 * 60 * 1000);
-            
             return filteredResults;
         } catch (error) {
             console.error('Search error:', error);
@@ -84,39 +116,69 @@ class ApifySearch {
 
         try {
             this.isSearching = true;
-            // Get popular actors ordered by popularity with pagination
-            const response = await fetch(`/api/popular/actors?limit=${limit}&offset=${offset}`);
-            
-            if (!response.ok) {
-                throw new Error(`Popular actors fetch failed: ${response.status}`);
-            }
+            const storeParams = new URLSearchParams({
+                limit: String(limit),
+                offset: String(offset),
+                sortBy: 'popularity'
+            });
+            const response = await fetch(`https://api.apify.com/v2/store?${storeParams.toString()}`, {
+                method: 'GET',
+                headers: { 'Accept': 'application/json' }
+            });
+            if (!response.ok) throw new Error(`Popular actors fetch failed: ${response.status}`);
 
-            const results = await response.json();
-            
-            // Debug: Log first few items to see what pricingModel values we're getting
+            const raw = await response.json();
+            const paginatedItems = raw?.data?.items || [];
+            const transformed = paginatedItems.map(actor => {
+                const ratingCandidates = [actor.actorReviewRating, actor.stats?.avgRating, actor.avgRating, actor.rating];
+                const firstFinite = ratingCandidates.map(Number).find(n => Number.isFinite(n));
+                const normalizedRating = Number.isFinite(firstFinite) ? firstFinite : null;
+                return {
+                    id: actor.id,
+                    title: actor.title || actor.name,
+                    path: `${actor.username}/${actor.name}`,
+                    description: actor.description || '',
+                    icon: actor.pictureUrl || null,
+                    pictureUrl: actor.pictureUrl || null,
+                    userPictureUrl: actor.userPictureUrl || null,
+                    username: actor.username,
+                    name: actor.name,
+                    pricingModel: actor.currentPricingInfo?.pricingModel,
+                    actorReviewRating: normalizedRating,
+                    stats: {
+                        totalUsers: actor.stats?.totalUsers || 0,
+                        lastRunFinishedAt: actor.stats?.lastRunFinishedAt,
+                        avgRating: normalizedRating
+                    }
+                };
+            });
+
+            const results = {
+                items: transformed,
+                total: raw?.data?.total || transformed.length,
+                count: transformed.length,
+                limit,
+                offset
+            };
+
             if (typeof window !== 'undefined' && window.__DEBUG__ !== false) console.log('Popular API Response sample:', results.items.slice(0, 3).map(actor => ({
                 title: actor.title,
-                pricingModel: actor.pricingModel
+                pricingModel: actor.pricingModel,
+                actorReviewRating: actor.actorReviewRating,
+                totalUsers: actor.stats?.totalUsers
             })));
-            
-            // Filter results to only include allowed pricing models
+
             const allowedPricingModels = ['FREE', 'PRICE_PER_DATASET_ITEM', 'PAY_PER_EVENT'];
             const filteredResults = {
                 ...results,
-                items: results.items.filter(actor => 
-                    allowedPricingModels.includes(actor.pricingModel)
-                ),
-                count: results.items.filter(actor => 
-                    allowedPricingModels.includes(actor.pricingModel)
-                ).length
+                items: results.items.filter(actor => allowedPricingModels.includes(actor.pricingModel)),
+                count: results.items.filter(actor => allowedPricingModels.includes(actor.pricingModel)).length
             };
-            
+
             if (typeof window !== 'undefined' && window.__DEBUG__ !== false) console.log(`Popular: Filtered ${results.items.length} items down to ${filteredResults.items.length}`);
-            
-            // Cache filtered results for 10 minutes
+
             this.searchCache.set(cacheKey, filteredResults);
             setTimeout(() => this.searchCache.delete(cacheKey), 10 * 60 * 1000);
-            
             return filteredResults;
         } catch (error) {
             console.error('Popular actors error:', error);

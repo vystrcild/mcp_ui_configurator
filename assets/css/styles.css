@@ -1825,7 +1825,7 @@ a:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; border-ra
 }
 
 .rating svg {
-    color: #000000;
+    color: #FFBF00; /* amber */
 }
 
 .actor-modal-card.selected .run-count,

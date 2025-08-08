@@ -194,6 +194,10 @@ function setupEventListeners() {
     // Actor search with debouncing
     elements.actorSearch.addEventListener('input', (e) => {
         const query = e.target.value.trim();
+        // Clear client cache to avoid stale items after backend changes
+        if (window.apifySearch && typeof window.apifySearch.clearCache === 'function') {
+            window.apifySearch.clearCache();
+        }
         
         if (query.length === 0) {
             // Load popular actors when search is empty
@@ -539,7 +543,7 @@ function renderActorsGrid() {
         const companyName = actor.username || 'Unknown User';
         const companyLogo = actor.userPictureUrl || actor.userAvatar || actor.avatar || 'assets/images/placeholder-user.jpg';
         const rating = getStableRating(actor);
-        const userCount = actor.stats?.totalUsers || Math.floor(Math.random() * 200000);
+        const userCount = actor.stats?.totalUsers ?? 0;
         const description = actor.description || actor.title;
 
         // Debug logging - show complete actor object structure
@@ -555,6 +559,12 @@ function renderActorsGrid() {
                 image: actor.image,
                 logo: actor.logo,
                 username: actor.username
+            });
+            console.log('Actor rating fields:', {
+                actorReviewRating: actor.actorReviewRating,
+                stats_avgRating: actor.stats?.avgRating,
+                avgRating: actor.avgRating,
+                rating: actor.rating
             });
         }
 
@@ -597,12 +607,13 @@ function renderActorsGrid() {
                         </svg>
                         ${formatUserCount(userCount)}
                     </span>
+                    ${typeof rating === 'number' ? `
                     <span class="rating">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M12 2l3.09 6.26 6.91 1-5 4.87 1.18 6.87-6.18-3.25-6.18 3.25 1.18-6.87-5-4.87 6.91-1z"/>
                         </svg>
-                        ${rating.toFixed(1)}
-                    </span>
+                        ${Number(rating).toFixed(1)}
+                    </span>` : ''}
                 </div>
             </div>
         `;
@@ -621,6 +632,12 @@ async function openActorModal() {
     // Load first page of popular actors and enable infinite scroll
     showSearchLoading();
     try {
+        // Clear client and server caches to avoid stale actor objects without rating
+        if (window.apifySearch && typeof window.apifySearch.clearCache === 'function') {
+            window.apifySearch.clearCache();
+        }
+        // Best-effort dev cache clear on backend (ignored in production)
+        fetch('/api/_dev/clear-cache', { method: 'POST' }).catch(() => {});
         window.__actorsScroll = { offset: 0, limit: 20, total: null, loading: false };
         const { limit } = window.__actorsScroll;
         const results = await window.apifySearch.getPopularActorsPage(limit, 0);
@@ -862,33 +879,21 @@ function updateServerConfig() {
 
 // Utility functions
 function getStableRating(actor) {
-    // Check if we already have a cached rating for this actor
-    if (ratingCache.has(actor.id)) {
-        return ratingCache.get(actor.id);
+    if (!actor) return null;
+    const cacheKey = actor.id || `${actor.username}/${actor.name}` || actor.title;
+    if (cacheKey && ratingCache.has(cacheKey)) {
+        return ratingCache.get(cacheKey);
     }
-    
-    // If actor has real rating data, use it
-    if (actor.stats?.avgRating) {
-        const rating = actor.stats.avgRating;
-        ratingCache.set(actor.id, rating);
-        return rating;
-    }
-    
-    // Generate deterministic fallback rating based on actor ID
-    // This ensures the same actor always gets the same rating
-    let hash = 0;
-    for (let i = 0; i < actor.id.length; i++) {
-        const char = actor.id.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
-        hash = hash & hash; // Convert to 32-bit integer
-    }
-    
-    // Convert hash to a rating between 4.0 and 5.0
-    const normalizedHash = Math.abs(hash) / Math.pow(2, 31);
-    const rating = 4.0 + normalizedHash;
-    
-    // Cache and return the stable rating
-    ratingCache.set(actor.id, rating);
+    // Accept multiple potential fields and coerce to number
+    const candidates = [
+        actor.actorReviewRating,
+        actor.stats?.avgRating,
+        actor.avgRating,
+        actor.rating,
+    ];
+    const numeric = candidates.map(Number).find(n => Number.isFinite(n));
+    const rating = Number.isFinite(numeric) ? numeric : null;
+    if (cacheKey && rating !== null) ratingCache.set(cacheKey, rating);
     return rating;
 }
 

@@ -123,7 +123,9 @@ app.get('/api/search/actors', async (req, res) => {
 
         // Transform results to match our expected format
         const transformedItems = paginatedItems.map(actor => {
-            
+            const ratingCandidates = [actor.actorReviewRating, actor.stats?.avgRating, actor.avgRating, actor.rating];
+            const firstFinite = ratingCandidates.map(Number).find(n => Number.isFinite(n));
+            const normalizedRating = Number.isFinite(firstFinite) ? firstFinite : null;
             return {
                 id: actor.id,
                 title: actor.title || actor.name,
@@ -135,9 +137,11 @@ app.get('/api/search/actors', async (req, res) => {
                 username: actor.username,
                 name: actor.name,
                 pricingModel: actor.currentPricingInfo?.pricingModel,
+                actorReviewRating: normalizedRating,
                 stats: {
                     totalUsers: actor.stats?.totalUsers || 0,
-                    lastRunFinishedAt: actor.stats?.lastRunFinishedAt
+                    lastRunFinishedAt: actor.stats?.lastRunFinishedAt,
+                    avgRating: normalizedRating
                 }
             };
         });
@@ -200,6 +204,9 @@ app.get('/api/popular/actors', async (req, res) => {
 
         // Transform results to match our expected format
         const transformedItems = paginatedItems.map(actor => {
+            const ratingCandidates = [actor.actorReviewRating, actor.stats?.avgRating, actor.avgRating, actor.rating];
+            const firstFinite = ratingCandidates.map(Number).find(n => Number.isFinite(n));
+            const normalizedRating = Number.isFinite(firstFinite) ? firstFinite : null;
             return {
                 id: actor.id,
                 title: actor.title || actor.name,
@@ -211,9 +218,11 @@ app.get('/api/popular/actors', async (req, res) => {
                 username: actor.username,
                 name: actor.name,
                 pricingModel: actor.currentPricingInfo?.pricingModel,
+                actorReviewRating: normalizedRating,
                 stats: {
                     totalUsers: actor.stats?.totalUsers || 0,
-                    lastRunFinishedAt: actor.stats?.lastRunFinishedAt
+                    lastRunFinishedAt: actor.stats?.lastRunFinishedAt,
+                    avgRating: normalizedRating
                 }
             };
         });
