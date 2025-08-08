@@ -1245,6 +1245,15 @@ a:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; border-ra
     color: #e2e8f0;
 }
 
+/* Force operators/punctuation to have no chip-like background in code blocks */
+.code-block .token.operator,
+.code-block .token.punctuation {
+    background: transparent !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+}
+
 .dark .token.comment,
 .dark .token.prolog,
 .dark .token.doctype,
@@ -1648,6 +1657,7 @@ a:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; border-ra
     gap: 0.75rem;
     min-height: 180px;
     text-align: left;
+    position: relative;
 }
 
 .actor-modal-card:hover {
@@ -1700,6 +1710,7 @@ a:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; border-ra
     display: flex;
     align-items: flex-start;
     gap: 0.75rem;
+    padding-right: 40px; /* Reserve space for external link icon */
 }
 
 .actor-card-title-section {
@@ -1723,7 +1734,7 @@ a:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; border-ra
     margin: 0;
     text-align: left;
     display: -webkit-box;
-    -webkit-line-clamp: 1;
+    -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
@@ -1827,6 +1838,40 @@ a:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; border-ra
 .actor-modal-card.selected .actor-card-description p {
     color: var(--primary-foreground);
     opacity: 0.8;
+}
+
+/* Small external link icon to Apify Store */
+.actor-store-link {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    color: var(--muted-foreground);
+    border: 1px solid transparent;
+    background: transparent;
+    z-index: 5;
+}
+
+.actor-store-link:hover {
+    color: var(--primary);
+    border-color: var(--primary);
+    background: var(--card-hover);
+}
+
+.actor-modal-card.selected .actor-store-link {
+    color: var(--primary-foreground);
+    border-color: rgba(255,255,255,0.25);
+    background: rgba(255,255,255,0.06);
+}
+
+.actor-store-link svg {
+    width: 14px;
+    height: 14px;
 }
 
 /* Enhanced Responsive Design */

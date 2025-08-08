@@ -36,6 +36,8 @@ let searchResults = [];
 let isUsingSearch = false;
 let activeTab = "configuration";
 let ratingCache = new Map(); // Cache for stable actor ratings
+// JSON Config modal state: whether to include APIFY_TOKEN env in examples
+let includeTokenInJsonConfig = false;
 
 // DOM Elements - will be initialized after DOM is ready
 let elements = {};
@@ -561,6 +563,15 @@ function renderActorsGrid() {
             `<img src="assets/images/placeholder-user.jpg" alt="${escapeHTML(actor.title)}" class="actor-icon" loading="lazy" width="40" height="40">`;
 
         actorCard.innerHTML = `
+            <a href="https://apify.com/${escapeHTML(actor.path)}" class="actor-store-link" title="Open in Apify Store" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path d="M14 3h7v7"/>
+                    <path d="M10 14L21 3"/>
+                    <path d="M21 14v7h-7"/>
+                    <path d="M3 10V3h7"/>
+                </svg>
+                <span class="sr-only">Open in Apify Store</span>
+            </a>
             <div class="actor-card-header">
                 <div class="actor-card-icon">
                     ${iconHtml}
@@ -1736,6 +1747,14 @@ console.log("Available tools:", tools.map(t => t.name));</code></pre>
             content: `
                 <div class="integration-step">
                     <p>Use JSON configuration to integrate Apify MCP with various MCP-compatible clients and tools.</p>
+                    <label class="checkbox-label" style="margin-top:0.5rem;">
+                        <input id="jsonConfigIncludeToken" type="checkbox" ${includeTokenInJsonConfig ? 'checked' : ''}>
+                        <span class="checkbox-custom"></span>
+                        <div class="checkbox-content">
+                            <div class="checkbox-title">Add API token</div>
+                            <div class="checkbox-description">If unchecked, OAuth 2.0 will be used by default.</div>
+                        </div>
+                    </label>
                 </div>
                 
                 <div class="platform-tabs">
@@ -1757,21 +1776,7 @@ console.log("Available tools:", tools.map(t => t.name));</code></pre>
                     <!-- Mac/Linux Config -->
                     <div class="platform-panel active" data-platform-panel="mac">
                         <div class="code-block">
-                            <pre><code class="language-json">{
-  "mcpServers": {
-    "apify": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@apify/mcp-server",
-        "run",
-        "@apify/mcp-server",
-        "--profile",
-        "default"
-      ]
-    }
-  }
-}</code></pre>
+                            <pre><code id="jsonConfigCode-mac" class="language-json"></code></pre>
                             <button class="copy-code-btn" onclick="copyCode(this)">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
@@ -1784,23 +1789,7 @@ console.log("Available tools:", tools.map(t => t.name));</code></pre>
                     <!-- Windows Config -->
                     <div class="platform-panel" data-platform-panel="windows">
                         <div class="code-block">
-                            <pre><code class="language-json">{
-  "mcpServers": {
-    "apify": {
-      "command": "cmd",
-      "args": [
-        "/c",
-        "npx",
-        "-y",
-        "@apify/mcp-server",
-        "run",
-        "@apify/mcp-server",
-        "--profile",
-        "default"
-      ]
-    }
-  }
-}</code></pre>
+                            <pre><code id="jsonConfigCode-windows" class="language-json"></code></pre>
                             <button class="copy-code-btn" onclick="copyCode(this)">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
@@ -1813,22 +1802,7 @@ console.log("Available tools:", tools.map(t => t.name));</code></pre>
                     <!-- WSL Config -->
                     <div class="platform-panel" data-platform-panel="wsl">
                         <div class="code-block">
-                            <pre><code class="language-json">{
-  "mcpServers": {
-    "apify": {
-      "command": "wsl",
-      "args": [
-        "npx",
-        "-y",
-        "@apify/mcp-server",
-        "run",
-        "@apify/mcp-server",
-        "--profile",
-        "default"
-      ]
-    }
-  }
-}</code></pre>
+                            <pre><code id="jsonConfigCode-wsl" class="language-json"></code></pre>
                             <button class="copy-code-btn" onclick="copyCode(this)">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
@@ -1857,7 +1831,53 @@ console.log("Available tools:", tools.map(t => t.name));</code></pre>
         
         // Apply Prism highlighting to all code blocks in the modal (lazy-load Prism if needed)
         ensurePrismHighlight(content);
+        if (integration === 'json-config') {
+            const cb = document.getElementById('jsonConfigIncludeToken');
+            if (cb) cb.addEventListener('change', (e) => { includeTokenInJsonConfig = !!e.target.checked; renderJsonConfigExamples(); });
+            renderJsonConfigExamples();
+        }
     }
+}
+
+function buildJsonConfig(platform) {
+    const serverName = 'Apify';
+    const actorsList = selectedActors.length > 0 ? selectedActors.map(a => a.path).join(',') : undefined;
+    const toolMapping = {
+        tool_apify_docs: 'docs',
+        tool_actor_runs: 'runs',
+        tool_apify_storage: 'storage',
+    };
+    const mappedTools = selectedTools
+        .map(id => toolMapping[id])
+        .filter((t, i, arr) => t && arr.indexOf(t) === i);
+    const server = {};
+    if (platform === 'mac') {
+        server.command = 'npx';
+        server.args = ['-y', '@apify/actors-mcp-server'];
+    } else if (platform === 'windows') {
+        server.command = 'cmd';
+        server.args = ['/c', 'npx', '-y', '@apify/actors-mcp-server'];
+    } else {
+        server.command = 'wsl';
+        server.args = ['npx', '-y', '@apify/actors-mcp-server'];
+    }
+    const optionalArgs = [];
+    if (actorsList && actorsList.length > 0) optionalArgs.push('--actors', actorsList);
+    if (mappedTools.length > 0) optionalArgs.push('--tools', mappedTools.join(','));
+    if (enableDynamicActors === false) optionalArgs.push('--enable-adding-actors', 'false');
+    server.args = server.args.concat(optionalArgs);
+    if (includeTokenInJsonConfig) server.env = { APIFY_TOKEN: 'YOUR_APIFY_TOKEN' };
+    return JSON.stringify({ mcpServers: { [serverName]: server } }, null, 2);
+}
+
+function renderJsonConfigExamples() {
+    const macEl = document.getElementById('jsonConfigCode-mac');
+    const winEl = document.getElementById('jsonConfigCode-windows');
+    const wslEl = document.getElementById('jsonConfigCode-wsl');
+    if (macEl) macEl.textContent = buildJsonConfig('mac');
+    if (winEl) winEl.textContent = buildJsonConfig('windows');
+    if (wslEl) wslEl.textContent = buildJsonConfig('wsl');
+    ensurePrismHighlight(document.getElementById('integrationContent'));
 }
 
 window.closeIntegrationModal = function() {
