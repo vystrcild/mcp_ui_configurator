@@ -1739,15 +1739,23 @@ console.log("Available tools:", tools.map(t => t.name));</code></pre>
                 </div>
                 
                 <div class="platform-tabs">
-                    <button class="platform-tab active" data-platform="mac" onclick="switchPlatformTab('mac')">Mac/Linux</button>
-                    <button class="platform-tab" data-platform="windows" onclick="switchPlatformTab('windows')">Windows</button>
-                    <button class="platform-tab" data-platform="wsl" onclick="switchPlatformTab('wsl')">WSL</button>
+                    <button class="platform-tab active" data-platform="mac" onclick="switchPlatformTab('mac')">
+                        <span class="platform-icon platform-mask" aria-hidden="true" style="-webkit-mask-image:url('assets/images/apple.svg'); mask-image:url('assets/images/apple.svg');"></span>
+                        <span>Mac/Linux</span>
+                    </button>
+                    <button class="platform-tab" data-platform="windows" onclick="switchPlatformTab('windows')">
+                        <span class="platform-icon platform-mask" aria-hidden="true" style="-webkit-mask-image:url('assets/images/windows.svg'); mask-image:url('assets/images/windows.svg');"></span>
+                        <span>Windows</span>
+                    </button>
+                    <button class="platform-tab" data-platform="wsl" onclick="switchPlatformTab('wsl')">
+                        <span class="platform-icon platform-mask" aria-hidden="true" style="-webkit-mask-image:url('assets/images/wsl.svg'); mask-image:url('assets/images/wsl.svg');"></span>
+                        <span>WSL</span>
+                    </button>
                 </div>
                 
                 <div class="platform-content">
                     <!-- Mac/Linux Config -->
                     <div class="platform-panel active" data-platform-panel="mac">
-                        <h4>JSON Configuration for Mac/Linux</h4>
                         <div class="code-block">
                             <pre><code class="language-json">{
   "mcpServers": {
@@ -1775,7 +1783,6 @@ console.log("Available tools:", tools.map(t => t.name));</code></pre>
                     
                     <!-- Windows Config -->
                     <div class="platform-panel" data-platform-panel="windows">
-                        <h4>JSON Configuration for Windows</h4>
                         <div class="code-block">
                             <pre><code class="language-json">{
   "mcpServers": {
@@ -1805,7 +1812,6 @@ console.log("Available tools:", tools.map(t => t.name));</code></pre>
                     
                     <!-- WSL Config -->
                     <div class="platform-panel" data-platform-panel="wsl">
-                        <h4>JSON Configuration for WSL</h4>
                         <div class="code-block">
                             <pre><code class="language-json">{
   "mcpServers": {
@@ -1831,18 +1837,6 @@ console.log("Available tools:", tools.map(t => t.name));</code></pre>
                             </button>
                         </div>
                     </div>
-                </div>
-                
-                <div class="integration-step">
-                    <h4>Using with MCP Clients</h4>
-                    <p>This JSON configuration can be used with any MCP-compatible client. Simply copy the configuration above and paste it into your client's MCP settings.</p>
-                    <p>Common MCP clients include:</p>
-                    <ul style="margin-left: 1.5rem; list-style: disc;">
-                        <li>Claude Desktop</li>
-                        <li>Cursor IDE</li>
-                        <li>VS Code with MCP extension</li>
-                        <li>Other MCP-compatible tools</li>
-                    </ul>
                 </div>
             `
         }

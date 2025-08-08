@@ -2486,26 +2486,59 @@ a:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; border-ra
 }
 
 .platform-tab {
-    padding: 0.5rem 1rem;
-    background: var(--muted);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.5rem 0.75rem;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 8px;
     font-size: 0.875rem;
-    font-weight: 500;
+    font-weight: 600;
     color: var(--muted-foreground);
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
 .platform-tab:hover {
-    background: var(--secondary);
+    background: var(--card-hover);
     color: var(--foreground);
 }
 
 .platform-tab.active {
-    background: var(--primary);
-    border-color: var(--primary);
-    color: var(--primary-foreground);
+    color: var(--primary);
+    background: var(--card-hover);
+    border-color: rgba(30,163,77,0.35);
+}
+
+.platform-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: currentColor;
+}
+
+.platform-icon-img {
+    width: 14px;
+    height: 14px;
+    display: block;
+    object-fit: contain;
+    filter: saturate(0.9) brightness(1.05);
+}
+
+/* Masked monochrome icons that inherit text color */
+.platform-mask {
+    display: inline-block !important;
+    width: 16px;
+    height: 16px;
+    background-color: currentColor;
+    /* Inline styles set mask-image directly for reliability across bundlers */
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    -webkit-mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    mask-size: contain;
 }
 
 .platform-content {
