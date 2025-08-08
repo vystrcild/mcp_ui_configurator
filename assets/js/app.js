@@ -1062,6 +1062,21 @@ window.showIntegrationDetails = function(integration) {
     const title = document.getElementById('integrationTitle');
     const content = document.getElementById('integrationContent');
     
+    // Header metadata (logo + name) for each integration
+    const integrationHeaderMeta = {
+        'claude': { name: 'Claude', icon: 'assets/images/claude.png' },
+        'claude-code': { name: 'Claude Code', icon: 'assets/images/anthropic.png' },
+        'cursor': { name: 'Cursor', icon: 'assets/images/cursor.png' },
+        'vscode': { name: 'VS Code', icon: 'assets/images/vscode.png' },
+        'windsurf': { name: 'Windsurf', icon: 'assets/images/windsurf.png' },
+        'warp': { name: 'Warp', icon: 'assets/images/warp.jpg' },
+        'anthropic-api': { name: 'Anthropic API', icon: 'assets/images/anthropic.png' },
+        'openai-api': { name: 'OpenAI API', icon: 'assets/images/openai.png' },
+        'python-sdk': { name: 'Python', icon: 'assets/images/python.png' },
+        'typescript-sdk': { name: 'TypeScript', icon: 'assets/images/typescript.png' },
+        'json-config': { name: 'JSON Config', icon: 'assets/images/json.png' }
+    };
+
     // Integration details content
     const integrationDetails = {
         'claude': {
@@ -1835,7 +1850,12 @@ console.log("Available tools:", tools.map(t => t.name));</code></pre>
     
     const details = integrationDetails[integration];
     if (details) {
-        title.textContent = details.title;
+        const meta = integrationHeaderMeta[integration];
+        if (meta) {
+            title.innerHTML = `<span class="integration-modal-title"><img src="${meta.icon}" alt="${meta.name}" class="integration-modal-title-icon" width="24" height="24" /><span>${meta.name}</span></span>`;
+        } else {
+            title.textContent = details.title;
+        }
         content.innerHTML = details.content;
         modal.classList.add('active');
         const modalBox = modal.querySelector('.modal');
