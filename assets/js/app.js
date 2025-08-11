@@ -1293,63 +1293,52 @@ window.showIntegrationDetails = function(integration) {
             title: 'Connect to Windsurf',
             content: `
                 <div class="integration-step">
-                    <p>Use Apify MCP directly from Windsurf IDE with Apify MCP. Enable your AI assistant to perform real-world tasks through a simple, secure connection without leaving your coding environment.</p>
-                </div>
-                
-                <div class="integration-step">
-                    <h4>Configuring Apify MCP in Windsurf</h4>
+                    <p>Add Apify MCP to Windsurf from the Plugin Store or via Settings → Cascade → Plugins.</p>
                     <ol>
-                        <li>Open Windsurf settings (⌘+,)</li>
-                        <li>Navigate to the "Cascade" tab and click "Add Server"</li>
-                        <li>Select "Add custom server +"</li>
-                        <li>Add the following JSON configuration, replacing the placeholder URL with your MCP URL from below</li>
+                        <li>Open Windsurf Settings → <strong>Cascade</strong> → <strong>Plugins</strong> and click <strong>Install</strong> on your plugin, or</li>
+                        <li>Edit <code>~/.codeium/windsurf/mcp_config.json</code> to add a server manually.</li>
+                        <li>Replace or update the file contents with the JSON below.</li>
                     </ol>
-                </div>
-                
-                <div class="warning-box">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"/>
-                        <line x1="12" y1="8" x2="12" y2="12"/>
-                        <line x1="12" y1="16" x2="12.01" y2="16"/>
-                    </svg>
-                    <p><strong>Caution:</strong> Treat your MCP server URL like a password! It can be used to run tools attached to this server and access your data.</p>
-                </div>
-                
-                <div class="code-block">
-                    <pre><code class="language-json">{
-  "mcpServers": {
-    "Apify": {
-      "command": "npx",
-      "args": [
-        "mcp-remote",
-        "${document.getElementById('mcpServerUrl').textContent}",
-        "--transport",
-        "http-only"
-      ],
-      "working_directory": null,
-      "start_on_launch": true
-    }
-  }
-}</code></pre>
-                    <button class="copy-code-btn" onclick="copyCode(this)">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-                        </svg>
-                    </button>
-                </div>
-                
-                <div class="integration-step">
-                    <h4>Server URL</h4>
-                    <p>The URL for this MCP server.</p>
-                    <div class="code-block">
-                        <pre><code>${document.getElementById('mcpServerUrl').textContent}</code></pre>
-                        <button class="copy-code-btn" onclick="copyCode(this)">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-                            </svg>
+                    <p class="text-sm text-muted-foreground" style="margin-top:0.25rem;">Tip: Press refresh after adding a new plugin.</p>
+                    <label class="checkbox-label" style="margin:0.75rem 0 0.75rem;">
+                        <input id="windsurfJsonIncludeToken" type="checkbox" ${includeTokenInJsonConfig ? 'checked' : ''}>
+                        <span class="checkbox-custom"></span>
+                        <div class="checkbox-content">
+                            <div class="checkbox-title">Add API token</div>
+                            <div class="checkbox-description">If unchecked, OAuth 2.0 will be used by default.</div>
+                        </div>
+                    </label>
+                    <div class="platform-tabs">
+                        <button class="platform-tab active" data-platform="remote" onclick="switchPlatformTab('remote')">
+                            <span>Remote (Streamable HTTP)</span>
                         </button>
+                        <button class="platform-tab" data-platform="local" onclick="switchPlatformTab('local')">
+                            <span>Local (stdio)</span>
+                        </button>
+                    </div>
+                    <div class="platform-content">
+                        <div class="platform-panel active" data-platform-panel="remote">
+                            <div class="code-block">
+                                <pre><code id="windsurfJsonCode-remote" class="language-json"></code></pre>
+                                <button class="copy-code-btn" onclick="copyCode(this)">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="platform-panel" data-platform-panel="local">
+                            <div class="code-block">
+                                <pre><code id="windsurfJsonCode-local" class="language-json"></code></pre>
+                                <button class="copy-code-btn" onclick="copyCode(this)">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             `
@@ -1358,63 +1347,52 @@ window.showIntegrationDetails = function(integration) {
             title: 'Connect to Warp',
             content: `
                 <div class="integration-step">
-                    <p>Use Apify MCP with Warp. Enable your AI assistant to perform real-world tasks through a simple, secure connection without leaving your coding environment.</p>
-                </div>
-                
-                <div class="integration-step">
-                    <h4>Configuring Apify MCP in Warp</h4>
+                    <h4>Open the MCP Servers page</h4>
+                    <ul>
+                        <li>Warp Drive: <strong>Personal → MCP Servers</strong></li>
+                        <li>Command Palette: search <strong>Open MCP Servers</strong></li>
+                        <li>Settings: <strong>AI → Manage MCP servers</strong></li>
+                    </ul>
+                    <h4 style="margin-top:0.75rem;">Add your server</h4>
                     <ol>
-                        <li>Open Warp's MCP Server settings</li>
-                        <li>Click "Add Server"</li>
-                        <li>Add the following JSON configuration, replacing the placeholder URL with your MCP URL from below</li>
-                        <li>Save and click 'Start'</li>
+                        <li>Click <strong>+ Add</strong>, then choose <strong>CLI Server (Command)</strong> or <strong>URL Server</strong>.</li>
+                        <li>Replace or update the configuration with the JSON below.</li>
                     </ol>
-                </div>
-                
-                <div class="warning-box">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"/>
-                        <line x1="12" y1="8" x2="12" y2="12"/>
-                        <line x1="12" y1="16" x2="12.01" y2="16"/>
-                    </svg>
-                    <p><strong>Caution:</strong> Treat your MCP server URL like a password! It can be used to run tools attached to this server and access your data.</p>
-                </div>
-                
-                <div class="code-block">
-                    <pre><code class="language-json">{
-  "mcpServers": {
-    "Apify": {
-      "command": "npx",
-      "args": [
-        "mcp-remote",
-        "${document.getElementById('mcpServerUrl').textContent}",
-        "--transport",
-        "http-only"
-      ],
-      "working_directory": null,
-      "start_on_launch": true
-    }
-  }
-}</code></pre>
-                    <button class="copy-code-btn" onclick="copyCode(this)">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-                        </svg>
-                    </button>
-                </div>
-                
-                <div class="integration-step">
-                    <h4>Server URL</h4>
-                    <p>The URL for this MCP server.</p>
-                    <div class="code-block">
-                        <pre><code>${document.getElementById('mcpServerUrl').textContent}</code></pre>
-                        <button class="copy-code-btn" onclick="copyCode(this)">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-                            </svg>
-                        </button>
+                    <label class="checkbox-label" style="margin:0.75rem 0 0.75rem;">
+                        <input id="warpJsonIncludeToken" type="checkbox" ${includeTokenInJsonConfig ? 'checked' : ''}>
+                        <span class="checkbox-custom"></span>
+                        <div class="checkbox-content">
+                            <div class="checkbox-title">Add API token</div>
+                            <div class="checkbox-description">If unchecked, OAuth 2.0 will be used by default.</div>
+                        </div>
+                    </label>
+                    <div class="platform-tabs">
+                        <button class="platform-tab active" data-platform="remote" onclick="switchPlatformTab('remote')"><span>Remote (Streamable HTTP)</span></button>
+                        <button class="platform-tab" data-platform="local" onclick="switchPlatformTab('local')"><span>Local (stdio)</span></button>
+                    </div>
+                    <div class="platform-content">
+                        <div class="platform-panel active" data-platform-panel="remote">
+                            <div class="code-block">
+                                <pre><code id="warpJsonCode-remote" class="language-json"></code></pre>
+                                <button class="copy-code-btn" onclick="copyCode(this)">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="platform-panel" data-platform-panel="local">
+                            <div class="code-block">
+                                <pre><code id="warpJsonCode-local" class="language-json"></code></pre>
+                                <button class="copy-code-btn" onclick="copyCode(this)">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             `
@@ -1867,6 +1845,11 @@ console.log("Available tools:", tools.map(t => t.name));</code></pre>
             if (cb) cb.addEventListener('change', (e) => { includeTokenInJsonConfig = !!e.target.checked; renderVsCodeJsonExamples(); });
             renderVsCodeJsonExamples();
         }
+        if (integration === 'windsurf') {
+            const cb = document.getElementById('windsurfJsonIncludeToken');
+            if (cb) cb.addEventListener('change', (e) => { includeTokenInJsonConfig = !!e.target.checked; renderWindsurfJsonExamples(); });
+            renderWindsurfJsonExamples();
+        }
         if (integration === 'cursor') {
             const cb = document.getElementById('cursorJsonIncludeToken');
             if (cb) cb.addEventListener('change', (e) => { includeTokenInJsonConfig = !!e.target.checked; renderCursorJsonExamples(); });
@@ -1876,6 +1859,11 @@ console.log("Available tools:", tools.map(t => t.name));</code></pre>
             const cbG = document.getElementById('geminiJsonIncludeToken');
             if (cbG) cbG.addEventListener('change', (e) => { includeTokenInJsonConfig = !!e.target.checked; renderGeminiJsonExamples(); });
             renderGeminiJsonExamples();
+        }
+        if (integration === 'warp') {
+            const cb = document.getElementById('warpJsonIncludeToken');
+            if (cb) cb.addEventListener('change', (e) => { includeTokenInJsonConfig = !!e.target.checked; renderWarpJsonExamples(); });
+            renderWarpJsonExamples();
         }
         if (integration === 'json-config') {
             const cb = document.getElementById('jsonConfigIncludeToken');
@@ -2028,6 +2016,22 @@ function renderVsCodeJsonExamples() {
     const remoteEl = document.getElementById('vscodeJsonCode-remote');
     if (localEl) localEl.textContent = buildVsCodeConfig('local');
     if (remoteEl) remoteEl.textContent = buildVsCodeConfig('remote');
+    ensurePrismHighlight(document.getElementById('integrationContent'));
+}
+
+function renderWarpJsonExamples() {
+    const localEl = document.getElementById('warpJsonCode-local');
+    const remoteEl = document.getElementById('warpJsonCode-remote');
+    if (localEl) localEl.textContent = buildJsonConfig('local');
+    if (remoteEl) remoteEl.textContent = buildJsonConfig('remote');
+    ensurePrismHighlight(document.getElementById('integrationContent'));
+}
+
+function renderWindsurfJsonExamples() {
+    const localEl = document.getElementById('windsurfJsonCode-local');
+    const remoteEl = document.getElementById('windsurfJsonCode-remote');
+    if (localEl) localEl.textContent = buildJsonConfig('local');
+    if (remoteEl) remoteEl.textContent = buildJsonConfig('remote');
     ensurePrismHighlight(document.getElementById('integrationContent'));
 }
 
