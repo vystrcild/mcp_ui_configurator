@@ -1163,22 +1163,17 @@ window.showIntegrationDetails = function(integration) {
             title: 'Connect to Claude Code',
             content: `
                 <div class="integration-step">
-                    <p>Use Apify MCP directly from Claude Code with a simple command-line setup. Enable your AI assistant to perform real-world tasks through a secure connection without leaving your development environment.</p>
-                </div>
-                
-                <div class="integration-step">
-                    <h4>Installing Claude Code</h4>
-                    <p>First, <a href="https://docs.anthropic.com/en/docs/claude-code" target="_blank">set up Claude Code if you haven't already</a></p>
-                </div>
-                
-                <div class="integration-step">
-                    <h4>Configuring Apify MCP in Claude Code</h4>
-                    <ol>
-                        <li>Open your terminal</li>
-                        <li>Run the following command to add this Apify MCP server:</li>
-                    </ol>
+                    <p>Add this Apify MCP server to Claude Code using the CLI:</p>
+                    <label class="checkbox-label" style="margin:0.75rem 0 0.75rem;">
+                        <input id="claudeCodeIncludeToken" type="checkbox" ${includeTokenInJsonConfig ? 'checked' : ''}>
+                        <span class="checkbox-custom"></span>
+                        <div class="checkbox-content">
+                            <div class="checkbox-title">Add API token</div>
+                            <div class="checkbox-description">If unchecked, OAuth 2.0 will be used by default.</div>
+                        </div>
+                    </label>
                     <div class="code-block">
-                        <pre><code class="language-bash">claude mcp add apify ${document.getElementById('mcpServerUrl').textContent} -t http -H "Authorization: Bearer YOUR_API_KEY"</code></pre>
+                        <pre><code id="claudeCodeCmd" class="language-bash"></code></pre>
                         <button class="copy-code-btn" onclick="copyCode(this)">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
@@ -1186,29 +1181,6 @@ window.showIntegrationDetails = function(integration) {
                             </svg>
                         </button>
                     </div>
-                </div>
-                
-                <div class="integration-step">
-                    <h4>API Key</h4>
-                    <p>The API key for this MCP server.</p>
-                    <div class="code-block">
-                        <pre><code>YOUR_API_KEY_HERE</code></pre>
-                        <button class="copy-code-btn" onclick="copyCode(this)">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="integration-step">
-                    <h4>Using MCP tools in Claude Code</h4>
-                    <ol>
-                        <li>Start a new conversation with Claude Code</li>
-                        <li>Claude will automatically have access to your Apify MCP tools</li>
-                        <li>Ask Claude to use them to automate your workflows!</li>
-                    </ol>
                 </div>
             `
         },
@@ -1843,6 +1815,11 @@ console.log("Available tools:", tools.map(t => t.name));</code></pre>
             if (cb) cb.addEventListener('change', (e) => { includeTokenInJsonConfig = !!e.target.checked; renderClaudeJsonExamples(); });
             renderClaudeJsonExamples();
         }
+        if (integration === 'claude-code') {
+            const cb = document.getElementById('claudeCodeIncludeToken');
+            if (cb) cb.addEventListener('change', (e) => { includeTokenInJsonConfig = !!e.target.checked; renderClaudeCodeCommand(); });
+            renderClaudeCodeCommand();
+        }
         if (integration === 'json-config') {
             const cb = document.getElementById('jsonConfigIncludeToken');
             if (cb) cb.addEventListener('change', (e) => { includeTokenInJsonConfig = !!e.target.checked; renderJsonConfigExamples(); });
@@ -1902,6 +1879,15 @@ function renderClaudeJsonExamples() {
     const remoteEl = document.getElementById('claudeJsonCode-remote');
     if (localEl) localEl.textContent = buildJsonConfig('local');
     if (remoteEl) remoteEl.textContent = buildJsonConfig('remote');
+    ensurePrismHighlight(document.getElementById('integrationContent'));
+}
+
+function renderClaudeCodeCommand() {
+    const el = document.getElementById('claudeCodeCmd');
+    if (!el) return;
+    const url = generateMcpUrl();
+    const tokenPart = includeTokenInJsonConfig ? ' -H "Authorization: Bearer YOUR_API_KEY"' : '';
+    el.textContent = `claude mcp add apify ${url} -t http${tokenPart}`;
     ensurePrismHighlight(document.getElementById('integrationContent'));
 }
 
