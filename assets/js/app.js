@@ -1158,6 +1158,7 @@ window.showIntegrationDetails = function(integration) {
                         <li>Quit Claude Desktop completely and reopen it to load the new configuration.</li>
                     </ol>
                 </div>
+                <p class="text-sm text-muted-foreground" style="margin-top:0.5rem;">For more details, see official <a href="https://modelcontextprotocol.io/quickstart/user" target="_blank" rel="noopener noreferrer">Claude Desktop documentation</a>.</p>
             `
         },
         'claude-code': {
@@ -1183,6 +1184,7 @@ window.showIntegrationDetails = function(integration) {
                         </button>
                     </div>
                 </div>
+                <p class="text-sm text-muted-foreground" style="margin-top:0.5rem;">For more details, see official <a href="https://docs.anthropic.com/en/docs/claude-code/mcp" target="_blank" rel="noopener noreferrer">Claude Code documentation</a>.</p>
             `
         },
         'cursor': {
@@ -1239,6 +1241,7 @@ window.showIntegrationDetails = function(integration) {
                         <li>Add and enable your server</li>
                     </ol>
                 </div>
+                <p class="text-sm text-muted-foreground" style="margin-top:0.5rem;">For more details, see official <a href="https://docs.cursor.com/en/context/mcp" target="_blank" rel="noopener noreferrer">Cursor documentation</a>.</p>
             `
         },
         'vscode': {
@@ -1287,6 +1290,7 @@ window.showIntegrationDetails = function(integration) {
                         </div>
                     </div>
                 </div>
+                <p class="text-sm text-muted-foreground" style="margin-top:0.5rem;">For more details, see official <a href="https://code.visualstudio.com/docs/copilot/chat/mcp-servers" target="_blank" rel="noopener noreferrer">VS Code documentation</a>.</p>
             `
         },
         'windsurf': {
@@ -1341,6 +1345,7 @@ window.showIntegrationDetails = function(integration) {
                         </div>
                     </div>
                 </div>
+                <p class="text-sm text-muted-foreground" style="margin-top:0.5rem;">For more details, see official <a href="https://docs.windsurf.com/windsurf/cascade/mcp" target="_blank" rel="noopener noreferrer">Windsurf documentation</a>.</p>
             `
         },
         'warp': {
@@ -1395,6 +1400,7 @@ window.showIntegrationDetails = function(integration) {
                         </div>
                     </div>
                 </div>
+                <p class="text-sm text-muted-foreground" style="margin-top:0.5rem;">For more details, see official <a href="https://docs.warp.dev/knowledge-and-collaboration/mcp" target="_blank" rel="noopener noreferrer">Warp documentation</a>.</p>
             `
         },
         'gemini-cli': {
@@ -1447,6 +1453,7 @@ window.showIntegrationDetails = function(integration) {
                         </div>
                     </div>
                 </div>
+                <p class="text-sm text-muted-foreground" style="margin-top:0.5rem;">For more details, see official <a href="https://github.com/google-gemini/gemini-cli" target="_blank" rel="noopener noreferrer">Gemini CLI documentation</a>.</p>
             `
         },
         'anthropic-api': {
