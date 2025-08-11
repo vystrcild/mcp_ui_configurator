@@ -1099,102 +1099,63 @@ window.showIntegrationDetails = function(integration) {
             title: 'Connect to Claude Desktop',
             content: `
                 <div class="integration-step">
-                    <p>Configure Claude Desktop to connect to your Apify MCP server using a small helper that bridges Claude to a remote HTTP MCP URL.</p>
-                </div>
-
-                <div class="integration-step">
-                    <h4>1. Open Claude Desktop Settings</h4>
-                    <p>From the system menu bar, open <strong>Claude → Settings…</strong> (not the settings inside the Claude chat window).</p>
-                </div>
-
-                <div class="integration-step">
-                    <h4>2. Access Developer Settings</h4>
-                    <p>In the Settings window, select the <strong>Developer</strong> tab and click <strong>Edit Config</strong>. This opens your config file:</p>
-                    <ul>
-                        <li>macOS: <code>~/Library/Application Support/Claude/claude_desktop_config.json</code></li>
-                        <li>Windows: <code>%APPDATA%\\Claude\\claude_desktop_config.json</code></li>
-                    </ul>
-                </div>
-
-                <div class="integration-step">
-                    <h4>3. Add the Apify MCP server</h4>
-                    <p>Replace the file contents with one of the following JSON configs. This starts a helper process that connects Claude Desktop to your Apify MCP server URL.</p>
-                </div>
-
-                <div class="warning-box">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"/>
-                        <line x1="12" y1="8" x2="12" y2="12"/>
-                        <line x1="12" y1="16" x2="12.01" y2="16"/>
-                    </svg>
-                    <p><strong>Caution:</strong> Treat your MCP server URL like a password.</p>
-                </div>
-
-                <div class="platform-tabs">
-                    <button class="platform-tab active" data-platform="mac" onclick="switchPlatformTab('mac')">
-                        <span class="platform-icon platform-mask" aria-hidden="true" style="-webkit-mask-image:url('assets/images/apple.svg'); mask-image:url('assets/images/apple.svg');"></span>
-                        <span>macOS</span>
-                    </button>
-                    <button class="platform-tab" data-platform="windows" onclick="switchPlatformTab('windows')">
-                        <span class="platform-icon platform-mask" aria-hidden="true" style="-webkit-mask-image:url('assets/images/windows.svg'); mask-image:url('assets/images/windows.svg');"></span>
-                        <span>Windows</span>
-                    </button>
-                </div>
-
-                <div class="platform-content">
-                    <div class="platform-panel active" data-platform-panel="mac">
-                        <div class="code-block">
-<pre><code class="language-json">{
-  "mcpServers": {
-    "Apify": {
-      "command": "npx",
-      "args": [
-        "mcp-remote",
-        "${document.getElementById('mcpServerUrl').textContent}",
-        "--transport",
-        "http-only"
-      ]
-    }
-  }
-}</code></pre>
-                            <button class="copy-code-btn" onclick="copyCode(this)">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="platform-panel" data-platform-panel="windows">
-                        <div class="code-block">
-<pre><code class="language-json">{
-  "mcpServers": {
-    "Apify": {
-      "command": "cmd",
-      "args": [
-        "/c",
-        "npx",
-        "mcp-remote",
-        "${document.getElementById('mcpServerUrl').textContent}",
-        "--transport",
-        "http-only"
-      ]
-    }
-  }
-}</code></pre>
-                            <button class="copy-code-btn" onclick="copyCode(this)">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="integration-step">
-                    <h4>4. Restart Claude Desktop</h4>
-                    <p>Quit Claude Desktop completely and reopen it to load the new configuration.</p>
+                    <p>Connect Claude Desktop directly to your Apify MCP server via its configuration file.</p>
+                    <ol>
+                        <li>From the system menu bar, open <strong>Claude → Settings…</strong> (not the settings inside the chat window).</li>
+                        <li>In the Settings window, navigate to the <strong>Developer</strong> tab in the left sidebar. This section contains options for configuring MCP servers and other developer features.</li>
+                        <li>Click <strong>Edit Config</strong> to open the configuration file:
+                            <ul>
+                                <li>macOS: <code>~/Library/Application Support/Claude/claude_desktop_config.json</code></li>
+                                <li>Windows: <code>%APPDATA%\\Claude\\claude_desktop_config.json</code></li>
+                            </ul>
+                        </li>
+                        <li>
+                            Replace or update the file contents with the JSON below.
+                            <div style="margin-top:0.75rem;">
+                                <label class="checkbox-label" style="margin:0.5rem 0 1rem;">
+                                    <input id="claudeJsonIncludeToken" type="checkbox" ${includeTokenInJsonConfig ? 'checked' : ''}>
+                                    <span class="checkbox-custom"></span>
+                                    <div class="checkbox-content">
+                                        <div class="checkbox-title">Add API token</div>
+                                        <div class="checkbox-description">If unchecked, OAuth 2.0 will be used by default.</div>
+                                    </div>
+                                </label>
+                                <div class="platform-tabs">
+                                    <button class="platform-tab active" data-platform="remote" onclick="switchPlatformTab('remote')">
+                                        <span>Remote</span>
+                                    </button>
+                                    <button class="platform-tab" data-platform="local" onclick="switchPlatformTab('local')">
+                                        <span>Local</span>
+                                    </button>
+                                </div>
+                                <div class="platform-content">
+                                    <div class="platform-panel active" data-platform-panel="remote">
+                                        <div class="code-block">
+                                            <pre><code id="claudeJsonCode-remote" class="language-json"></code></pre>
+                                            <button class="copy-code-btn" onclick="copyCode(this)">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="platform-panel" data-platform-panel="local">
+                                        <div class="code-block">
+                                            <pre><code id="claudeJsonCode-local" class="language-json"></code></pre>
+                                            <button class="copy-code-btn" onclick="copyCode(this)">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li>Quit Claude Desktop completely and reopen it to load the new configuration.</li>
+                    </ol>
                 </div>
             `
         },
@@ -1685,6 +1646,16 @@ window.showIntegrationDetails = function(integration) {
                             </svg>
                         </button>
                     </div>
+                    <p style="margin:0.5rem 0 0.5rem;">Or with uv:</p>
+                    <div class="code-block">
+                        <pre><code class="language-bash">uv add "mcp[cli]"</code></pre>
+                        <button class="copy-code-btn" onclick="copyCode(this)">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
                 
                 <div class="integration-step">
@@ -1866,6 +1837,12 @@ console.log("Available tools:", tools.map(t => t.name));</code></pre>
         
         // Apply Prism highlighting to all code blocks in the modal (lazy-load Prism if needed)
         ensurePrismHighlight(content);
+        if (integration === 'claude') {
+            // Sync includeToken checkbox state and re-render on change
+            const cb = document.getElementById('claudeJsonIncludeToken');
+            if (cb) cb.addEventListener('change', (e) => { includeTokenInJsonConfig = !!e.target.checked; renderClaudeJsonExamples(); });
+            renderClaudeJsonExamples();
+        }
         if (integration === 'json-config') {
             const cb = document.getElementById('jsonConfigIncludeToken');
             if (cb) cb.addEventListener('change', (e) => { includeTokenInJsonConfig = !!e.target.checked; renderJsonConfigExamples(); });
@@ -1915,6 +1892,14 @@ function buildJsonConfig(platform) {
 function renderJsonConfigExamples() {
     const localEl = document.getElementById('jsonConfigCode-local');
     const remoteEl = document.getElementById('jsonConfigCode-remote');
+    if (localEl) localEl.textContent = buildJsonConfig('local');
+    if (remoteEl) remoteEl.textContent = buildJsonConfig('remote');
+    ensurePrismHighlight(document.getElementById('integrationContent'));
+}
+
+function renderClaudeJsonExamples() {
+    const localEl = document.getElementById('claudeJsonCode-local');
+    const remoteEl = document.getElementById('claudeJsonCode-remote');
     if (localEl) localEl.textContent = buildJsonConfig('local');
     if (remoteEl) remoteEl.textContent = buildJsonConfig('remote');
     ensurePrismHighlight(document.getElementById('integrationContent'));
