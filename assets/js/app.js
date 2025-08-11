@@ -1123,10 +1123,10 @@ window.showIntegrationDetails = function(integration) {
                                 </label>
                                 <div class="platform-tabs">
                                     <button class="platform-tab active" data-platform="remote" onclick="switchPlatformTab('remote')">
-                                        <span>Remote</span>
+                                        <span>Remote (Streamable HTTP)</span>
                                     </button>
                                     <button class="platform-tab" data-platform="local" onclick="switchPlatformTab('local')">
-                                        <span>Local</span>
+                                        <span>Local (stdio)</span>
                                     </button>
                                 </div>
                                 <div class="platform-content">
@@ -1189,113 +1189,102 @@ window.showIntegrationDetails = function(integration) {
             title: 'Connect to Cursor',
             content: `
                 <div class="integration-step">
-                    <p>Use tools directly from Cursor IDE with Apify MCP. Enable your AI assistant to perform real-world tasks through a simple, secure connection without leaving your coding environment.</p>
-                </div>
-                
-                <div class="integration-step">
-                    <h4>Configuring Apify MCP in Cursor</h4>
-                    <p>First try and click on the "Add to Cursor" button below to automatically have it configured. If that doesn't work or you need to modify the installation follow the directions below.</p>
-                    
-                    <button class="btn-secondary" style="margin: 1rem 0;">Add to Cursor</button>
-                    
+                    <p>Configure Cursor to connect to your Apify MCP server using an <code>mcp.json</code> file.</p>
                     <ol>
-                        <li>Open Cursor settings (⌘+⌘+J)</li>
-                        <li>Navigate to the "MCP Tools" tab and click "New MCP Server"</li>
-                        <li>Copy/paste the following JSON configuration from below, then hit CMD+S or CTRL+S to save.</li>
+                        <li>Create <code>~/.cursor/mcp.json</code> for a global setup, or <code>.cursor/mcp.json</code> in your project.</li>
+                        <li>Replace or update the file contents with the JSON below.</li>
                     </ol>
-                </div>
-                
-                <div class="warning-box">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"/>
-                        <line x1="12" y1="8" x2="12" y2="12"/>
-                        <line x1="12" y1="16" x2="12.01" y2="16"/>
-                    </svg>
-                    <p><strong>Caution:</strong> Treat your MCP server URL like a password! It can be used to run tools attached to this server and access your data.</p>
-                </div>
-                
-                <div class="code-block">
-                    <pre><code class="language-json">{
-  "mcpServers": {
-    "Apify": {
-      "url": "${document.getElementById('mcpServerUrl').textContent}"
-    }
-  }
-}</code></pre>
-                    <button class="copy-code-btn" onclick="copyCode(this)">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-                        </svg>
-                    </button>
-                </div>
-                
-                <div class="integration-step">
-                    <h4>Server URL</h4>
-                    <p>The URL for this MCP server.</p>
-                    <div class="code-block">
-                        <pre><code>${document.getElementById('mcpServerUrl').textContent}</code></pre>
-                        <button class="copy-code-btn" onclick="copyCode(this)">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-                            </svg>
-                        </button>
+                    <label class="checkbox-label" style="margin:0.75rem 0 0.75rem;">
+                        <input id="cursorJsonIncludeToken" type="checkbox" ${includeTokenInJsonConfig ? 'checked' : ''}>
+                        <span class="checkbox-custom"></span>
+                        <div class="checkbox-content">
+                            <div class="checkbox-title">Add API token</div>
+                            <div class="checkbox-description">If unchecked, OAuth 2.0 will be used by default.</div>
+                        </div>
+                    </label>
+                    <div class="platform-tabs">
+                        <button class="platform-tab active" data-platform="remote" onclick="switchPlatformTab('remote')"><span>Remote (Streamable HTTP)</span></button>
+                        <button class="platform-tab" data-platform="local" onclick="switchPlatformTab('local')"><span>Local (stdio)</span></button>
+                    </div>
+                    <div class="platform-content">
+                        <div class="platform-panel active" data-platform-panel="remote">
+                            <div class="code-block">
+                                <pre><code id="cursorJsonCode-remote" class="language-json"></code></pre>
+                                <button class="copy-code-btn" onclick="copyCode(this)">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="platform-panel" data-platform-panel="local">
+                            <div class="code-block">
+                                <pre><code id="cursorJsonCode-local" class="language-json"></code></pre>
+                                <button class="copy-code-btn" onclick="copyCode(this)">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                
-                <p style="margin-top: 1rem;">To use Apify MCP within Cursor, set the chat to Agent mode</p>
+                <div class="integration-step">
+                    <h4>Enable in Cursor</h4>
+                    <ol>
+                        <li>Open Cursor Settings (⌘+⇧+J)</li>
+                        <li>Go to <strong>Features → Model Context Protocol</strong></li>
+                        <li>Add and enable your server</li>
+                    </ol>
+                </div>
             `
         },
         'vscode': {
             title: 'Connect to Visual Studio Code',
             content: `
                 <div class="integration-step">
-                    <p>Use tools directly inside of Visual Studio Code with Apify MCP. Enable your AI assistant to perform real-world tasks through a simple, secure connection without leaving your coding environment.</p>
-                </div>
-                
-                <div class="warning-box">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"/>
-                        <line x1="12" y1="8" x2="12" y2="12"/>
-                        <line x1="12" y1="16" x2="12.01" y2="16"/>
-                    </svg>
-                    <p><strong>Important:</strong> You must have GitHub Copilot enabled and set to 'Agent' mode in Visual Studio Code for Apify MCP to work properly.</p>
-                </div>
-                
-                <div class="integration-step">
-                    <h4>Configuring Apify MCP in Visual Studio Code</h4>
+                    <p>Use Apify MCP in VS Code with GitHub Copilot. Configure via workspace file or Command Palette.</p>
                     <ol>
-                        <li>Open the Visual Studio Code command palette (⌘+⌘+P on Mac, Ctrl+Shift+P on Windows)</li>
-                        <li>Type "MCP: Add Server..." and press Enter</li>
-                        <li>Choose "HTTP (HTTP or Server-Sent Events)" and press Enter</li>
-                        <li>Paste the server URL from below into the "Server URL" field and press Enter</li>
-                        <li>Give the server a name and press Enter</li>
-                        <li>Make sure that GitHub Copilot is set to "Agent" mode</li>
-                        <li>Ask GitHub Copilot to use the tools from your server!</li>
+                        <li>Workspace method: create <code>.vscode/mcp.json</code> in your workspace.</li>
+                        <li>Command Palette method: run <strong>MCP: Add Server</strong> and follow prompts (choose workspace or user settings).</li>
                     </ol>
-                </div>
-                
-                <div class="warning-box">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"/>
-                        <line x1="12" y1="8" x2="12" y2="12"/>
-                        <line x1="12" y1="16" x2="12.01" y2="16"/>
-                    </svg>
-                    <p><strong>Caution:</strong> Treat your MCP server URL like a password! It can be used to run tools attached to this server and access your data.</p>
-                </div>
-                
-                <div class="integration-step">
-                    <h4>Server URL</h4>
-                    <p>The URL for this MCP server.</p>
-                    <div class="code-block">
-                        <pre><code>${document.getElementById('mcpServerUrl').textContent}</code></pre>
-                        <button class="copy-code-btn" onclick="copyCode(this)">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-                            </svg>
-                        </button>
+                    <label class="checkbox-label" style="margin:0.75rem 0 0.75rem;">
+                        <input id="vscodeJsonIncludeToken" type="checkbox" ${includeTokenInJsonConfig ? 'checked' : ''}>
+                        <span class="checkbox-custom"></span>
+                        <div class="checkbox-content">
+                            <div class="checkbox-title">Add API token</div>
+                            <div class="checkbox-description">If unchecked, OAuth 2.0 will be used by default.</div>
+                        </div>
+                    </label>
+                    <div class="platform-tabs">
+                        <button class="platform-tab active" data-platform="remote" onclick="switchPlatformTab('remote')"><span>Remote (Streamable HTTP)</span></button>
+                        <button class="platform-tab" data-platform="local" onclick="switchPlatformTab('local')"><span>Local (stdio)</span></button>
+                    </div>
+                    <div class="platform-content">
+                        <div class="platform-panel active" data-platform-panel="remote">
+                            <div class="code-block">
+                                <pre><code id="vscodeJsonCode-remote" class="language-json"></code></pre>
+                                <button class="copy-code-btn" onclick="copyCode(this)">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="platform-panel" data-platform-panel="local">
+                            <div class="code-block">
+                                <pre><code id="vscodeJsonCode-local" class="language-json"></code></pre>
+                                <button class="copy-code-btn" onclick="copyCode(this)">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             `
@@ -1449,10 +1438,10 @@ window.showIntegrationDetails = function(integration) {
                     </label>
                     <div class="platform-tabs">
                         <button class="platform-tab active" data-platform="remote" onclick="switchPlatformTab('remote')">
-                            <span>Remote</span>
+                            <span>Remote (Streamable HTTP)</span>
                         </button>
                         <button class="platform-tab" data-platform="local" onclick="switchPlatformTab('local')">
-                            <span>Local</span>
+                            <span>Local (stdio)</span>
                         </button>
                     </div>
                     <div class="platform-content">
@@ -1809,10 +1798,10 @@ console.log("Available tools:", tools.map(t => t.name));</code></pre>
                 
                 <div class="platform-tabs">
                     <button class="platform-tab active" data-platform="remote" onclick="switchPlatformTab('remote')">
-                        <span>Remote</span>
+                        <span>Remote (Streamable HTTP)</span>
                     </button>
                     <button class="platform-tab" data-platform="local" onclick="switchPlatformTab('local')">
-                        <span>Local</span>
+                        <span>Local (stdio)</span>
                     </button>
                 </div>
                 
@@ -1873,6 +1862,16 @@ console.log("Available tools:", tools.map(t => t.name));</code></pre>
             if (cb) cb.addEventListener('change', (e) => { includeTokenInJsonConfig = !!e.target.checked; renderClaudeCodeCommand(); });
             renderClaudeCodeCommand();
         }
+        if (integration === 'vscode') {
+            const cb = document.getElementById('vscodeJsonIncludeToken');
+            if (cb) cb.addEventListener('change', (e) => { includeTokenInJsonConfig = !!e.target.checked; renderVsCodeJsonExamples(); });
+            renderVsCodeJsonExamples();
+        }
+        if (integration === 'cursor') {
+            const cb = document.getElementById('cursorJsonIncludeToken');
+            if (cb) cb.addEventListener('change', (e) => { includeTokenInJsonConfig = !!e.target.checked; renderCursorJsonExamples(); });
+            renderCursorJsonExamples();
+        }
         if (integration === 'gemini-cli') {
             const cbG = document.getElementById('geminiJsonIncludeToken');
             if (cbG) cbG.addEventListener('change', (e) => { includeTokenInJsonConfig = !!e.target.checked; renderGeminiJsonExamples(); });
@@ -1924,6 +1923,65 @@ function buildJsonConfig(platform) {
     return JSON.stringify({ mcpServers: { [serverName]: server } }, null, 2);
 }
 
+// VS Code-specific configuration builder (adds inputs for token; servers key with type stdio/sse)
+function buildVsCodeConfig(platform) {
+    const serverName = 'Apify';
+    const inputs = includeTokenInJsonConfig
+        ? [
+            {
+                type: 'promptString',
+                id: 'apify-token',
+                description: 'Apify API token',
+                password: true,
+            }
+        ]
+        : undefined;
+
+    if (platform === 'remote') {
+        const server = {
+            // Streamable HTTP: omit explicit type per VS Code docs request
+            url: generateMcpUrl(),
+        };
+        if (includeTokenInJsonConfig) {
+            server.headers = {
+                Authorization: 'Bearer ${input:apify-token}'
+            };
+        }
+        const config = {};
+        if (inputs) config.inputs = inputs; // ensure inputs appear before servers
+        config.servers = { [serverName]: server };
+        return JSON.stringify(config, null, 2);
+    }
+
+    // Local (stdio) configuration
+    const actorsList = selectedActors.length > 0 ? selectedActors.map(a => a.path).join(',') : undefined;
+    const toolMapping = {
+        tool_apify_docs: 'docs',
+        tool_actor_runs: 'runs',
+        tool_apify_storage: 'storage',
+    };
+    const mappedTools = selectedTools
+        .map(id => toolMapping[id])
+        .filter((t, i, arr) => t && arr.indexOf(t) === i);
+
+    const server = {
+        // stdio (local) - omit explicit type per request
+        command: 'npx',
+        args: ['-y', '@apify/actors-mcp-server'],
+    };
+    const optionalArgs = [];
+    if (actorsList && actorsList.length > 0) optionalArgs.push('--actors', actorsList);
+    if (mappedTools.length > 0) optionalArgs.push('--tools', mappedTools.join(','));
+    if (enableDynamicActors === false) optionalArgs.push('--enable-adding-actors', 'false');
+    server.args = server.args.concat(optionalArgs);
+    if (includeTokenInJsonConfig) server.env = { APIFY_TOKEN: '${input:apify-token}' };
+
+    const config = {};
+    if (inputs) config.inputs = inputs; // ensure inputs appear before servers
+    config.servers = { [serverName]: server };
+    return JSON.stringify(config, null, 2);
+}
+
 function renderJsonConfigExamples() {
     const localEl = document.getElementById('jsonConfigCode-local');
     const remoteEl = document.getElementById('jsonConfigCode-remote');
@@ -1949,11 +2007,27 @@ function renderClaudeCodeCommand() {
     ensurePrismHighlight(document.getElementById('integrationContent'));
 }
 
+function renderCursorJsonExamples() {
+    const localEl = document.getElementById('cursorJsonCode-local');
+    const remoteEl = document.getElementById('cursorJsonCode-remote');
+    if (localEl) localEl.textContent = buildJsonConfig('local');
+    if (remoteEl) remoteEl.textContent = buildJsonConfig('remote');
+    ensurePrismHighlight(document.getElementById('integrationContent'));
+}
+
 function renderGeminiJsonExamples() {
     const localEl = document.getElementById('geminiJsonCode-local');
     const remoteEl = document.getElementById('geminiJsonCode-remote');
     if (localEl) localEl.textContent = buildJsonConfig('local');
     if (remoteEl) remoteEl.textContent = buildJsonConfig('remote');
+    ensurePrismHighlight(document.getElementById('integrationContent'));
+}
+
+function renderVsCodeJsonExamples() {
+    const localEl = document.getElementById('vscodeJsonCode-local');
+    const remoteEl = document.getElementById('vscodeJsonCode-remote');
+    if (localEl) localEl.textContent = buildVsCodeConfig('local');
+    if (remoteEl) remoteEl.textContent = buildVsCodeConfig('remote');
     ensurePrismHighlight(document.getElementById('integrationContent'));
 }
 
