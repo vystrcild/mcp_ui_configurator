@@ -1479,64 +1479,156 @@ window.showIntegrationDetails = function(integration) {
                     </div>
                 </div>
                 
-                <div class="integration-step">
-                    <h4>MCP server information</h4>
-                    <p><strong>MCP Server URL</strong></p>
-                    <p>The URL for this MCP server.</p>
-                    <div class="code-block">
-                        <pre><code>${document.getElementById('mcpServerUrl').textContent}</code></pre>
-                        <button class="copy-code-btn" onclick="copyCode(this)">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-                            </svg>
-                        </button>
-                    </div>
-                    
-                    <p style="margin-top: 1rem;"><strong>API Key</strong></p>
-                    <p>The API key for this MCP server.</p>
-                    <p>Pass this in a Authorization: Bearer {apiKey} header when calling the Apify MCP server.</p>
-                    <div class="code-block">
-                        <pre><code>YOUR_API_KEY_HERE</code></pre>
-                        <button class="copy-code-btn" onclick="copyCode(this)">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
+                
                 
                 <div class="integration-step">
                     <h4>Using Anthropic's Messages API</h4>
                     <p><a href="https://docs.anthropic.com/claude/docs/messages-api" target="_blank">Anthropic's Messages API</a> can be used to call Apify MCP from anywhere.</p>
                     
-                    <h4>Code Example</h4>
-                    <div class="code-block">
-                        <pre><code class="language-bash">curl https://api.anthropic.com/v1/messages \\
--H "Content-Type: application/json" \\
--H "X-API-Key: $ANTHROPIC_API_KEY" \\
--H "anthropic-version: 2023-06-01" \\
--H "anthropic-beta: mcp-client-2025-04-04" \\
--d '{
-  "model": "claude-sonnet-4-20250514",
-  "max_tokens": 1000,
-  "messages": [{"role": "user", "content": "What tools do you have available?"}],
-  "mcp_servers": [
+                    <div class="platform-tabs">
+                        <button class="platform-tab active" data-platform="anthropic-curl" onclick="switchPlatformTab('anthropic-curl')"><span>cURL</span></button>
+                        <button class="platform-tab" data-platform="anthropic-js" onclick="switchPlatformTab('anthropic-js')"><span>JavaScript</span></button>
+                        <button class="platform-tab" data-platform="anthropic-py" onclick="switchPlatformTab('anthropic-py')"><span>Python</span></button>
+                    </div>
+                    <div class="platform-content">
+                        <div class="platform-panel active" data-platform-panel="anthropic-curl">
+                            <div class="code-block">
+<pre><code class="language-bash">curl https://api.anthropic.com/v1/messages \
+ -H "Content-Type: application/json" \
+ -H "X-API-Key: $ANTHROPIC_API_KEY" \
+ -H "anthropic-version: 2023-06-01" \
+ -H "anthropic-beta: mcp-client-2025-04-04" \
+ -d '{
+   "model": "claude-sonnet-4-20250514",
+   "max_tokens": 1000,
+   "messages": [{"role": "user", "content": "What tools do you have available?"}],
+   "mcp_servers": [
+     {
+       "type": "url",
+       "url": "${document.getElementById('mcpServerUrl').textContent}",
+       "name": "apify",
+       "authorization_token": "apify_api_token"
+     }
+   ],
+   "betas": ["mcp-client-2025-04-04"]
+ }'</code></pre>
+                                <button class="copy-code-btn" onclick="copyCode(this)">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                                </svg>
+                            </button>
+                            </div>
+                        </div>
+                        <div class="platform-panel" data-platform-panel="anthropic-js">
+                            <p class="text-sm" style="margin:0.5rem 0 0.25rem;">Installation</p>
+                            <div class="code-block">
+                                <pre><code class="language-bash">npm install @anthropic-ai/sdk</code></pre>
+                                <button class="copy-code-btn" onclick="copyCode(this)">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                                    </svg>
+                                </button>
+                            </div>
+                            <p class="text-sm" style="margin:0.25rem 0 0.25rem;">or with pnpm</p>
+                            <div class="code-block">
+                                <pre><code class="language-bash">pnpm add @anthropic-ai/sdk</code></pre>
+                                <button class="copy-code-btn" onclick="copyCode(this)">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="code-block">
+<pre><code class="language-typescript">import { Anthropic } from "@anthropic-ai/sdk";
+
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY,
+});
+
+const response = await anthropic.beta.messages.create({
+  model: "claude-sonnet-4-20250514",
+  max_tokens: 1000,
+  messages: [
     {
-      "type": "url",
-      "url": "${document.getElementById('mcpServerUrl').textContent}",
-      "name": "apify",
-      "authorization_token": "YOUR_API_KEY"
-    }
-  ]
-}'</code></pre>
-                        <button class="copy-code-btn" onclick="copyCode(this)">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-                        </svg>
-                    </button>
+      role: "user",
+      content: "What tools do you have available?",
+    },
+  ],
+  mcp_servers: [
+    {
+      type: "url",
+      url: "${document.getElementById('mcpServerUrl').textContent}",
+      name: "apify",
+      authorization_token: "apify_api_token",
+    },
+  ],
+  betas: ["mcp-client-2025-04-04"],
+});
+
+console.log(JSON.stringify(response, null, 2));</code></pre>
+                                <button class="copy-code-btn" onclick="copyCode(this)">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="platform-panel" data-platform-panel="anthropic-py">
+                            <p class="text-sm" style="margin:0.5rem 0 0.25rem;">Installation</p>
+                            <div class="code-block">
+                                <pre><code class="language-bash">pip install anthropic</code></pre>
+                                <button class="copy-code-btn" onclick="copyCode(this)">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                                    </svg>
+                                </button>
+                            </div>
+                            <p class="text-sm" style="margin:0.25rem 0 0.25rem;">or with uv</p>
+                            <div class="code-block">
+                                <pre><code class="language-bash">uv pip install anthropic</code></pre>
+                                <button class="copy-code-btn" onclick="copyCode(this)">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="code-block">
+<pre><code class="language-python">import anthropic
+
+client = anthropic.Anthropic(
+    # API key defaults to os.environ.get("ANTHROPIC_API_KEY")
+)
+
+response = client.beta.messages.create(
+    model="claude-sonnet-4-20250514",
+    max_tokens=1000,
+    messages=[{"role": "user", "content": "What tools do you have available?"}],
+    mcp_servers=[
+        {
+            "type": "url",
+            "url": "${document.getElementById('mcpServerUrl').textContent}",
+            "name": "apify",
+            "authorization_token": "apify_api_token",
+        }
+    ],
+    betas=["mcp-client-2025-04-04"],
+)
+
+print(response)</code></pre>
+                                <button class="copy-code-btn" onclick="copyCode(this)">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             `
@@ -1564,43 +1656,23 @@ window.showIntegrationDetails = function(integration) {
                     </div>
                 </div>
                 
-                <div class="integration-step">
-                    <h4>MCP server information</h4>
-                    <p><strong>MCP Server URL</strong></p>
-                    <p>The URL for this MCP server.</p>
-                    <div class="code-block">
-                        <pre><code>${document.getElementById('mcpServerUrl').textContent}</code></pre>
-                        <button class="copy-code-btn" onclick="copyCode(this)">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-                            </svg>
-                        </button>
-                    </div>
-                    
-                    <p style="margin-top: 1rem;"><strong>API Key</strong></p>
-                    <p>The API key for this MCP server.</p>
-                    <p>Pass this in a Authorization: Bearer {apiKey} header when calling the Apify MCP server.</p>
-                    <div class="code-block">
-                        <pre><code>YOUR_API_KEY_HERE</code></pre>
-                        <button class="copy-code-btn" onclick="copyCode(this)">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
+                
                 
                 <div class="integration-step">
                     <h4>Using OpenAI's Responses API</h4>
                     <p><a href="https://platform.openai.com/docs/api-reference/responses" target="_blank">OpenAI's Responses API</a> can be used to call Apify MCP from anywhere.</p>
                     
-                    <h4>Code Example</h4>
-                    <div class="code-block">
-                        <pre><code class="language-bash">curl --location 'https://api.openai.com/v1/responses' \\
---header 'Content-Type: application/json' \\
---header "Authorization: Bearer $OPENAI_API_KEY" \\
+                    <div class="platform-tabs">
+                        <button class="platform-tab active" data-platform="openai-curl" onclick="switchPlatformTab('openai-curl')"><span>cURL</span></button>
+                        <button class="platform-tab" data-platform="openai-js" onclick="switchPlatformTab('openai-js')"><span>JavaScript</span></button>
+                        <button class="platform-tab" data-platform="openai-py" onclick="switchPlatformTab('openai-py')"><span>Python</span></button>
+                    </div>
+                    <div class="platform-content">
+                        <div class="platform-panel active" data-platform-panel="openai-curl">
+                            <div class="code-block">
+<pre><code class="language-bash">curl --location 'https://api.openai.com/v1/responses' \
+--header 'Content-Type: application/json' \
+--header "Authorization: Bearer $OPENAI_API_KEY" \
 --data '{
   "model": "gpt-4.1",
   "tools": [
@@ -1610,19 +1682,125 @@ window.showIntegrationDetails = function(integration) {
       "server_url": "${document.getElementById('mcpServerUrl').textContent}",
       "require_approval": "never",
       "headers": {
-        "Authorization": "Bearer YOUR_API_KEY"
+        "Authorization": "Bearer apify_api_token"
       }
     }
   ],
-  "input": "List all of my available tools",
+  "input": "What tools do you have available?",
   "tool_choice": "required"
 }'</code></pre>
-                        <button class="copy-code-btn" onclick="copyCode(this)">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-                        </svg>
-                    </button>
+                                <button class="copy-code-btn" onclick="copyCode(this)">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="platform-panel" data-platform-panel="openai-js">
+                            <p class="text-sm" style="margin:0.5rem 0 0.25rem;">Installation</p>
+                            <div class="code-block">
+                                <pre><code class="language-bash">npm install openai</code></pre>
+                                <button class="copy-code-btn" onclick="copyCode(this)">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                                    </svg>
+                                </button>
+                            </div>
+                            <p class="text-sm" style="margin:0.25rem 0 0.25rem;">or with pnpm</p>
+                            <div class="code-block">
+                                <pre><code class="language-bash">pnpm add openai</code></pre>
+                                <button class="copy-code-btn" onclick="copyCode(this)">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="code-block">
+<pre><code class="language-typescript">import OpenAI from "openai";
+
+const openai = new OpenAI();
+
+const response = await openai.responses.create({
+  model: "gpt-4.1",
+  input: "What tools do you have available?",
+  tool_choice: "required",
+  tools: [
+    {
+      type: "mcp",
+      server_label: "apify",
+      server_url: "${document.getElementById('mcpServerUrl').textContent}",
+      require_approval: "never",
+      headers: {
+        Authorization: "Bearer apify_api_token",
+      },
+    },
+  ],
+});
+
+console.log(response);</code></pre>
+                                <button class="copy-code-btn" onclick="copyCode(this)">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="platform-panel" data-platform-panel="openai-py">
+                            <p class="text-sm" style="margin:0.5rem 0 0.25rem;">Installation</p>
+                            <div class="code-block">
+                                <pre><code class="language-bash">pip install openai</code></pre>
+                                <button class="copy-code-btn" onclick="copyCode(this)">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                                    </svg>
+                                </button>
+                            </div>
+                            <p class="text-sm" style="margin:0.25rem 0 0.25rem;">or with uv</p>
+                            <div class="code-block">
+                                <pre><code class="language-bash">uv pip install openai</code></pre>
+                                <button class="copy-code-btn" onclick="copyCode(this)">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="code-block">
+<pre><code class="language-python">from openai import OpenAI
+
+client = OpenAI()
+
+response = client.responses.create(
+    model="gpt-4.1",
+    input="What tools do you have available?",
+    tool_choice="required",
+    tools=[
+        {
+            "type": "mcp",
+            "server_label": "apify",
+            "server_url": "${document.getElementById('mcpServerUrl').textContent}",
+            "require_approval": "never",
+            "headers": {
+                "Authorization": "Bearer apify_api_token",
+            },
+        }
+    ],
+)
+
+print(response)</code></pre>
+                                <button class="copy-code-btn" onclick="copyCode(this)">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             `

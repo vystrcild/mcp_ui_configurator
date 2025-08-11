@@ -2935,6 +2935,6 @@ a:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; border-ra
 }
 
 /* Reduce gap between platform tabs and code block inside integration modal */
-.integration-modal .platform-tabs { margin-bottom: 0.25rem !important; }
+.integration-modal .platform-tabs { margin-top: 0.5rem !important; margin-bottom: 0.25rem !important; }
 .integration-modal .platform-content { margin-top: 0 !important; }
 .integration-modal .platform-panel .code-block { margin: 0.25rem 0 0.75rem 0 !important; }
