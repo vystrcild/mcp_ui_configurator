@@ -1086,6 +1086,7 @@ window.showIntegrationDetails = function(integration) {
         'vscode': { name: 'VS Code', icon: 'assets/images/vscode.png' },
         'windsurf': { name: 'Windsurf', icon: 'assets/images/windsurf.png' },
         'warp': { name: 'Warp', icon: 'assets/images/warp.jpg' },
+        'gemini-cli': { name: 'Gemini CLI', icon: 'assets/images/gemini.png' },
         'anthropic-api': { name: 'Anthropic API', icon: 'assets/images/anthropic.png' },
         'openai-api': { name: 'OpenAI API', icon: 'assets/images/openai.png' },
         'python-sdk': { name: 'Python', icon: 'assets/images/python.png' },
@@ -1425,6 +1426,58 @@ window.showIntegrationDetails = function(integration) {
                                 <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
                             </svg>
                         </button>
+                    </div>
+                </div>
+            `
+        },
+        'gemini-cli': {
+            title: 'Connect to Gemini CLI',
+            content: `
+                <div class="integration-step">
+                    <p>Configure Gemini CLI to connect to your Apify MCP server by adding an <code>mcpServers</code> block to your Gemini settings.</p>
+                    <ol>
+                        <li>Create or open your global settings file at <code>~/.gemini/settings.json</code>, or in your project's root create <code>.gemini/settings.json</code>.</li>
+                        <li>Replace or update the file contents with the JSON below.</li>
+                    </ol>
+                    <label class="checkbox-label" style="margin:0.75rem 0 0.75rem;">
+                        <input id="geminiJsonIncludeToken" type="checkbox" ${includeTokenInJsonConfig ? 'checked' : ''}>
+                        <span class="checkbox-custom"></span>
+                        <div class="checkbox-content">
+                            <div class="checkbox-title">Add API token</div>
+                            <div class="checkbox-description">If unchecked, OAuth 2.0 will be used by default.</div>
+                        </div>
+                    </label>
+                    <div class="platform-tabs">
+                        <button class="platform-tab active" data-platform="remote" onclick="switchPlatformTab('remote')">
+                            <span>Remote</span>
+                        </button>
+                        <button class="platform-tab" data-platform="local" onclick="switchPlatformTab('local')">
+                            <span>Local</span>
+                        </button>
+                    </div>
+                    <div class="platform-content">
+                        <div class="platform-panel active" data-platform-panel="remote">
+                            <div class="code-block">
+                                <pre><code id="geminiJsonCode-remote" class="language-json"></code></pre>
+                                <button class="copy-code-btn" onclick="copyCode(this)">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="platform-panel" data-platform-panel="local">
+                            <div class="code-block">
+                                <pre><code id="geminiJsonCode-local" class="language-json"></code></pre>
+                                <button class="copy-code-btn" onclick="copyCode(this)">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             `
@@ -1820,6 +1873,11 @@ console.log("Available tools:", tools.map(t => t.name));</code></pre>
             if (cb) cb.addEventListener('change', (e) => { includeTokenInJsonConfig = !!e.target.checked; renderClaudeCodeCommand(); });
             renderClaudeCodeCommand();
         }
+        if (integration === 'gemini-cli') {
+            const cbG = document.getElementById('geminiJsonIncludeToken');
+            if (cbG) cbG.addEventListener('change', (e) => { includeTokenInJsonConfig = !!e.target.checked; renderGeminiJsonExamples(); });
+            renderGeminiJsonExamples();
+        }
         if (integration === 'json-config') {
             const cb = document.getElementById('jsonConfigIncludeToken');
             if (cb) cb.addEventListener('change', (e) => { includeTokenInJsonConfig = !!e.target.checked; renderJsonConfigExamples(); });
@@ -1888,6 +1946,14 @@ function renderClaudeCodeCommand() {
     const url = generateMcpUrl();
     const tokenPart = includeTokenInJsonConfig ? ' -H "Authorization: Bearer YOUR_API_KEY"' : '';
     el.textContent = `claude mcp add apify ${url} -t http${tokenPart}`;
+    ensurePrismHighlight(document.getElementById('integrationContent'));
+}
+
+function renderGeminiJsonExamples() {
+    const localEl = document.getElementById('geminiJsonCode-local');
+    const remoteEl = document.getElementById('geminiJsonCode-remote');
+    if (localEl) localEl.textContent = buildJsonConfig('local');
+    if (remoteEl) remoteEl.textContent = buildJsonConfig('remote');
     ensurePrismHighlight(document.getElementById('integrationContent'));
 }
 
