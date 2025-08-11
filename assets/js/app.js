@@ -10,7 +10,7 @@ const TOOLS_DATA = [
         id: 'tool_apify_docs',
         name: 'Apify documentation',
         description: 'Search Apify documentation and fetch specific documents for development help.',
-        category: 'optional'
+        category: 'default'
     },
     {
         id: 'tool_actor_runs',
@@ -795,7 +795,6 @@ function generateServerConfig() {
     const serverName = "Apify-mcp-server";
     
     const toolMapping = {
-        tool_apify_docs: "docs",
         tool_actor_runs: "runs",
         tool_apify_storage: "storage",
     };
@@ -837,7 +836,6 @@ function generateMcpUrl() {
     
     if (selectedTools.length > 0) {
         const toolMapping = {
-            tool_apify_docs: "docs",
             tool_actor_runs: "runs",
             tool_apify_storage: "storage",
         };
@@ -1936,7 +1934,6 @@ function buildJsonConfig(platform) {
     const serverName = 'apify';
     const actorsList = selectedActors.length > 0 ? selectedActors.map(a => a.path).join(',') : undefined;
     const toolMapping = {
-        tool_apify_docs: 'docs',
         tool_actor_runs: 'runs',
         tool_apify_storage: 'storage',
     };
@@ -1988,7 +1985,6 @@ function buildVsCodeConfig(platform) {
     // Local (stdio) configuration
     const actorsList = selectedActors.length > 0 ? selectedActors.map(a => a.path).join(',') : undefined;
     const toolMapping = {
-        tool_apify_docs: 'docs',
         tool_actor_runs: 'runs',
         tool_apify_storage: 'storage',
     };
