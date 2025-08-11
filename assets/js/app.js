@@ -1080,7 +1080,7 @@ window.showIntegrationDetails = function(integration) {
     
     // Header metadata (logo + name) for each integration
     const integrationHeaderMeta = {
-        'claude': { name: 'Claude', icon: 'assets/images/claude.png' },
+        'claude': { name: 'Claude Desktop', icon: 'assets/images/claude.png' },
         'claude-code': { name: 'Claude Code', icon: 'assets/images/anthropic.png' },
         'cursor': { name: 'Cursor', icon: 'assets/images/cursor.png' },
         'vscode': { name: 'VS Code', icon: 'assets/images/vscode.png' },
@@ -1096,56 +1096,105 @@ window.showIntegrationDetails = function(integration) {
     // Integration details content
     const integrationDetails = {
         'claude': {
-            title: 'Connect to Claude',
+            title: 'Connect to Claude Desktop',
             content: `
                 <div class="integration-step">
-                    <p>Connect Claude to Apify MCP, enabling it to perform real-world tasks through a simple, secure connection without leaving your conversation.</p>
+                    <p>Configure Claude Desktop to connect to your Apify MCP server using a small helper that bridges Claude to a remote HTTP MCP URL.</p>
                 </div>
-                
+
                 <div class="integration-step">
-                    <h4>For Claude account admins/owners</h4>
-                    <ol>
-                        <li>Go to <a href="https://claude.ai/settings/connectors" target="_blank">claude.ai/settings/connectors</a></li>
-                        <li>Click the "Browse connectors" button</li>
-                        <li>Find the Apify connector and click on it</li>
-                        <li>Click the "Add to your team" button</li>
-                        <li>Paste in your Integration URL from below</li>
-                        <li>Click "Add"</li>
-                    </ol>
+                    <h4>1. Open Claude Desktop Settings</h4>
+                    <p>From the system menu bar, open <strong>Claude → Settings…</strong> (not the settings inside the Claude chat window).</p>
                 </div>
-                
+
                 <div class="integration-step">
-                    <h4>Integration URL</h4>
-                    <div class="code-block">
-                        <pre><code id="claudeUrl" class="language-bash">${document.getElementById('mcpServerUrl').textContent}</code></pre>
-                        <button class="copy-code-btn" onclick="copyCode(this)">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-                            </svg>
-                        </button>
-                    </div>
+                    <h4>2. Access Developer Settings</h4>
+                    <p>In the Settings window, select the <strong>Developer</strong> tab and click <strong>Edit Config</strong>. This opens your config file:</p>
+                    <ul>
+                        <li>macOS: <code>~/Library/Application Support/Claude/claude_desktop_config.json</code></li>
+                        <li>Windows: <code>%APPDATA%\\Claude\\claude_desktop_config.json</code></li>
+                    </ul>
                 </div>
-                
+
+                <div class="integration-step">
+                    <h4>3. Add the Apify MCP server</h4>
+                    <p>Replace the file contents with one of the following JSON configs. This starts a helper process that connects Claude Desktop to your Apify MCP server URL.</p>
+                </div>
+
                 <div class="warning-box">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="12" cy="12" r="10"/>
                         <line x1="12" y1="8" x2="12" y2="12"/>
                         <line x1="12" y1="16" x2="12.01" y2="16"/>
                     </svg>
-                    <p><strong>Note:</strong> The added integration will be available to all users in the Claude organization, but only you will be able to see actions you add to this MCP server.</p>
+                    <p><strong>Caution:</strong> Treat your MCP server URL like a password.</p>
                 </div>
-                
+
+                <div class="platform-tabs">
+                    <button class="platform-tab active" data-platform="mac" onclick="switchPlatformTab('mac')">
+                        <span class="platform-icon platform-mask" aria-hidden="true" style="-webkit-mask-image:url('assets/images/apple.svg'); mask-image:url('assets/images/apple.svg');"></span>
+                        <span>macOS</span>
+                    </button>
+                    <button class="platform-tab" data-platform="windows" onclick="switchPlatformTab('windows')">
+                        <span class="platform-icon platform-mask" aria-hidden="true" style="-webkit-mask-image:url('assets/images/windows.svg'); mask-image:url('assets/images/windows.svg');"></span>
+                        <span>Windows</span>
+                    </button>
+                </div>
+
+                <div class="platform-content">
+                    <div class="platform-panel active" data-platform-panel="mac">
+                        <div class="code-block">
+<pre><code class="language-json">{
+  "mcpServers": {
+    "Apify": {
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "${document.getElementById('mcpServerUrl').textContent}",
+        "--transport",
+        "http-only"
+      ]
+    }
+  }
+}</code></pre>
+                            <button class="copy-code-btn" onclick="copyCode(this)">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="platform-panel" data-platform-panel="windows">
+                        <div class="code-block">
+<pre><code class="language-json">{
+  "mcpServers": {
+    "Apify": {
+      "command": "cmd",
+      "args": [
+        "/c",
+        "npx",
+        "mcp-remote",
+        "${document.getElementById('mcpServerUrl').textContent}",
+        "--transport",
+        "http-only"
+      ]
+    }
+  }
+}</code></pre>
+                            <button class="copy-code-btn" onclick="copyCode(this)">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="integration-step">
-                    <h4>For Claude account members</h4>
-                    <p>Once your Claude account admin/owner has completed the steps above:</p>
-                    <ol>
-                        <li>Go to <a href="https://claude.ai/settings/connectors" target="_blank">claude.ai/settings/connectors</a></li>
-                        <li>You should see the Apify integration that your admin added and named</li>
-                        <li>Next to that integration, click "Connect" - you'll be taken to an OAuth screen</li>
-                        <li>Once you've authorized the connection, you can use your Apify MCP tools in Claude</li>
-                        <li>View, enable, and disable Claude's access to tools with the "Search and Tools" button in chat</li>
-                    </ol>
+                    <h4>4. Restart Claude Desktop</h4>
+                    <p>Quit Claude Desktop completely and reopen it to load the new configuration.</p>
                 </div>
             `
         },
@@ -1763,25 +1812,19 @@ console.log("Available tools:", tools.map(t => t.name));</code></pre>
                 </div>
                 
                 <div class="platform-tabs">
-                    <button class="platform-tab active" data-platform="mac" onclick="switchPlatformTab('mac')">
-                        <span class="platform-icon platform-mask" aria-hidden="true" style="-webkit-mask-image:url('assets/images/apple.svg'); mask-image:url('assets/images/apple.svg');"></span>
-                        <span>Mac/Linux</span>
+                    <button class="platform-tab active" data-platform="remote" onclick="switchPlatformTab('remote')">
+                        <span>Remote</span>
                     </button>
-                    <button class="platform-tab" data-platform="windows" onclick="switchPlatformTab('windows')">
-                        <span class="platform-icon platform-mask" aria-hidden="true" style="-webkit-mask-image:url('assets/images/windows.svg'); mask-image:url('assets/images/windows.svg');"></span>
-                        <span>Windows</span>
-                    </button>
-                    <button class="platform-tab" data-platform="wsl" onclick="switchPlatformTab('wsl')">
-                        <span class="platform-icon platform-mask" aria-hidden="true" style="-webkit-mask-image:url('assets/images/wsl.svg'); mask-image:url('assets/images/wsl.svg');"></span>
-                        <span>WSL</span>
+                    <button class="platform-tab" data-platform="local" onclick="switchPlatformTab('local')">
+                        <span>Local</span>
                     </button>
                 </div>
                 
                 <div class="platform-content">
-                    <!-- Mac/Linux Config -->
-                    <div class="platform-panel active" data-platform-panel="mac">
+                    <!-- Local Config -->
+                    <div class="platform-panel" data-platform-panel="local">
                         <div class="code-block">
-                            <pre><code id="jsonConfigCode-mac" class="language-json"></code></pre>
+                            <pre><code id="jsonConfigCode-local" class="language-json"></code></pre>
                             <button class="copy-code-btn" onclick="copyCode(this)">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
@@ -1791,23 +1834,10 @@ console.log("Available tools:", tools.map(t => t.name));</code></pre>
                         </div>
                     </div>
                     
-                    <!-- Windows Config -->
-                    <div class="platform-panel" data-platform-panel="windows">
+                    <!-- Remote Config -->
+                    <div class="platform-panel active" data-platform-panel="remote">
                         <div class="code-block">
-                            <pre><code id="jsonConfigCode-windows" class="language-json"></code></pre>
-                            <button class="copy-code-btn" onclick="copyCode(this)">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <!-- WSL Config -->
-                    <div class="platform-panel" data-platform-panel="wsl">
-                        <div class="code-block">
-                            <pre><code id="jsonConfigCode-wsl" class="language-json"></code></pre>
+                            <pre><code id="jsonConfigCode-remote" class="language-json"></code></pre>
                             <button class="copy-code-btn" onclick="copyCode(this)">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
@@ -1845,7 +1875,22 @@ console.log("Available tools:", tools.map(t => t.name));</code></pre>
 }
 
 function buildJsonConfig(platform) {
-    const serverName = 'Apify';
+    // Remote config uses URL-based server, Local uses command-based server
+    if (platform === 'remote') {
+        const serverKey = 'apify';
+        const server = {
+            url: generateMcpUrl()
+        };
+        if (includeTokenInJsonConfig) {
+            server.headers = {
+                Authorization: 'Bearer your-apify-token'
+            };
+        }
+        return JSON.stringify({ mcpServers: { [serverKey]: server } }, null, 2);
+    }
+
+    // Default to local (command-based) configuration
+    const serverName = 'apify';
     const actorsList = selectedActors.length > 0 ? selectedActors.map(a => a.path).join(',') : undefined;
     const toolMapping = {
         tool_apify_docs: 'docs',
@@ -1856,16 +1901,8 @@ function buildJsonConfig(platform) {
         .map(id => toolMapping[id])
         .filter((t, i, arr) => t && arr.indexOf(t) === i);
     const server = {};
-    if (platform === 'mac') {
-        server.command = 'npx';
-        server.args = ['-y', '@apify/actors-mcp-server'];
-    } else if (platform === 'windows') {
-        server.command = 'cmd';
-        server.args = ['/c', 'npx', '-y', '@apify/actors-mcp-server'];
-    } else {
-        server.command = 'wsl';
-        server.args = ['npx', '-y', '@apify/actors-mcp-server'];
-    }
+    server.command = 'npx';
+    server.args = ['-y', '@apify/actors-mcp-server'];
     const optionalArgs = [];
     if (actorsList && actorsList.length > 0) optionalArgs.push('--actors', actorsList);
     if (mappedTools.length > 0) optionalArgs.push('--tools', mappedTools.join(','));
@@ -1876,12 +1913,10 @@ function buildJsonConfig(platform) {
 }
 
 function renderJsonConfigExamples() {
-    const macEl = document.getElementById('jsonConfigCode-mac');
-    const winEl = document.getElementById('jsonConfigCode-windows');
-    const wslEl = document.getElementById('jsonConfigCode-wsl');
-    if (macEl) macEl.textContent = buildJsonConfig('mac');
-    if (winEl) winEl.textContent = buildJsonConfig('windows');
-    if (wslEl) wslEl.textContent = buildJsonConfig('wsl');
+    const localEl = document.getElementById('jsonConfigCode-local');
+    const remoteEl = document.getElementById('jsonConfigCode-remote');
+    if (localEl) localEl.textContent = buildJsonConfig('local');
+    if (remoteEl) remoteEl.textContent = buildJsonConfig('remote');
     ensurePrismHighlight(document.getElementById('integrationContent'));
 }
 
