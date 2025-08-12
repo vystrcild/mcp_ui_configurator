@@ -2926,3 +2926,33 @@ a:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; border-ra
 .integration-modal .platform-tabs { margin-top: 0.5rem !important; margin-bottom: 0.25rem !important; }
 .integration-modal .platform-content { margin-top: 0 !important; }
 .integration-modal .platform-panel .code-block { margin: 0.25rem 0 0.75rem 0 !important; }
+
+/* Mobile-first sidebar compaction: show only logo and Docs button */
+@media (max-width: 768px) {
+    /* Turn sidebar into a compact top bar */
+    .sidebar {
+        flex-direction: row !important;
+        align-items: center !important;
+        width: 100% !important;
+        padding: 0.75rem 1rem !important;
+        border-right: none !important;
+        border-bottom: 1px solid var(--border) !important;
+        gap: 0.75rem !important;
+    }
+
+    /* Keep logo and the "Apify MCP" title visible */
+    .sidebar-header { margin: 0 !important; }
+    .sidebar-header h2 { display: inline-block !important; font-size: 1.125rem !important; }
+
+    /* Hide the configuration text; keep only the docs button */
+    .sidebar-content { flex: 1 1 auto !important; display: flex !important; align-items: center !important; justify-content: flex-end !important; padding: 0 !important; }
+    .sidebar-content > h3,
+    .sidebar-content > p.sidebar-description { display: none !important; }
+
+    .sidebar-info { margin: 0 0 0 auto !important; }
+    .docs-callout { padding: 0.5rem 0.75rem !important; border-radius: var(--radius) !important; gap: 0.5rem !important; }
+    .docs-callout > div { white-space: nowrap; }
+
+    /* Let main content size naturally below the bar */
+    .main-content { height: auto !important; }
+}
