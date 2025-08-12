@@ -1450,7 +1450,7 @@ window.showIntegrationDetails = function(integration) {
        "type": "url",
        "url": "${document.getElementById('mcpServerUrl').textContent}",
        "name": "apify",
-       "authorization_token": "apify_api_token"
+       "authorization_token": "your-apify-token"
      }
    ],
    "betas": ["mcp-client-2025-04-04"]
@@ -1505,7 +1505,7 @@ const response = await anthropic.beta.messages.create({
       type: "url",
       url: "${document.getElementById('mcpServerUrl').textContent}",
       name: "apify",
-      authorization_token: "apify_api_token",
+      authorization_token: "your-apify-token",
     },
   ],
   betas: ["mcp-client-2025-04-04"],
@@ -1557,7 +1557,7 @@ response = client.beta.messages.create(
             "type": "url",
             "url": "${document.getElementById('mcpServerUrl').textContent}",
             "name": "apify",
-            "authorization_token": "apify_api_token",
+            "authorization_token": "your-apify-token",
         }
     ],
     betas=["mcp-client-2025-04-04"],
@@ -1625,7 +1625,7 @@ print(response)</code></pre>
       "server_url": "${document.getElementById('mcpServerUrl').textContent}",
       "require_approval": "never",
       "headers": {
-        "Authorization": "Bearer apify_api_token"
+        "Authorization": "Bearer your-apify-token"
       }
     }
   ],
@@ -1677,7 +1677,7 @@ const response = await openai.responses.create({
       server_url: "${document.getElementById('mcpServerUrl').textContent}",
       require_approval: "never",
       headers: {
-        Authorization: "Bearer apify_api_token",
+        Authorization: "Bearer your-apify-token",
       },
     },
   ],
@@ -1729,7 +1729,7 @@ response = client.responses.create(
             "server_url": "${document.getElementById('mcpServerUrl').textContent}",
             "require_approval": "never",
             "headers": {
-                "Authorization": "Bearer apify_api_token",
+                "Authorization": "Bearer your-apify-token",
             },
         }
     ],
@@ -1871,7 +1871,7 @@ function buildJsonConfig(platform) {
         };
         if (includeTokenInJsonConfig) {
             server.headers = {
-                Authorization: 'Bearer your-apify-token'
+                Authorization: 'Bearer <your-apify-token>'
             };
         }
         return JSON.stringify({ mcpServers: { [serverKey]: server } }, null, 2);
@@ -1895,7 +1895,7 @@ function buildJsonConfig(platform) {
     if (mappedTools.length > 0) optionalArgs.push('--tools', mappedTools.join(','));
     if (enableDynamicActors === false) optionalArgs.push('--enable-adding-actors', 'false');
     server.args = server.args.concat(optionalArgs);
-    if (includeTokenInJsonConfig) server.env = { APIFY_TOKEN: 'YOUR_APIFY_TOKEN' };
+    if (includeTokenInJsonConfig) server.env = { APIFY_TOKEN: '<your-apify-token>' };
     return JSON.stringify({ mcpServers: { [serverName]: server } }, null, 2);
 }
 
@@ -1977,7 +1977,7 @@ function renderClaudeCodeCommand() {
     const el = document.getElementById('claudeCodeCmd');
     if (!el) return;
     const url = generateMcpUrl();
-    const tokenPart = includeTokenInJsonConfig ? ' -H "Authorization: Bearer YOUR_API_KEY"' : '';
+    const tokenPart = includeTokenInJsonConfig ? ' -H "Authorization: Bearer <your-apify-token>"' : '';
     el.textContent = `claude mcp add apify ${url} -t http${tokenPart}`;
     ensurePrismHighlight(document.getElementById('integrationContent'));
 }
