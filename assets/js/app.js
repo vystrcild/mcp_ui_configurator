@@ -166,13 +166,7 @@ function setupEventListeners() {
     // Add actors button
     document.getElementById('addActorsBtn').addEventListener('click', openActorModal);
     
-    // Tab buttons
-    document.querySelectorAll('.tab-button').forEach(button => {
-        button.addEventListener('click', (e) => {
-            const tab = e.currentTarget.dataset.tab;
-            switchTab(tab);
-        });
-    });
+    // Tabs removed: no tab buttons to wire
 
     // Removed theme toggle support: app runs in dark mode only
     
@@ -291,45 +285,7 @@ function setupEventListeners() {
 
 // Accessibility setup for tabs and modals
 function setupAccessibility() {
-    // Tabs ARIA roles and keyboard navigation
-    const tabsContainer = document.getElementById('tabsContainer');
-    if (tabsContainer) {
-        tabsContainer.setAttribute('role', 'tablist');
-        const tabButtons = document.querySelectorAll('.tab-button');
-        document.querySelectorAll('.tab-content').forEach(panel => panel.setAttribute('role', 'tabpanel'));
-
-        tabButtons.forEach((btn) => {
-            const tabName = btn.dataset.tab;
-            const panel = document.getElementById(tabName);
-            const selected = btn.classList.contains('active');
-
-            btn.setAttribute('role', 'tab');
-            btn.setAttribute('aria-controls', tabName);
-            btn.setAttribute('aria-selected', selected ? 'true' : 'false');
-            btn.setAttribute('tabindex', selected ? '0' : '-1');
-
-            if (panel) {
-                if (!btn.id) btn.id = `tab-${tabName}`;
-                panel.setAttribute('aria-labelledby', btn.id);
-            }
-        });
-
-        tabsContainer.addEventListener('keydown', (e) => {
-            const keys = ['ArrowLeft', 'ArrowRight', 'Home', 'End'];
-            if (!keys.includes(e.key)) return;
-            e.preventDefault();
-            const tabs = Array.from(document.querySelectorAll('.tab-button'));
-            let currentIndex = tabs.findIndex(t => t === document.activeElement);
-            if (currentIndex === -1) currentIndex = tabs.findIndex(t => t.getAttribute('aria-selected') === 'true');
-            let nextIndex = currentIndex;
-            if (e.key === 'ArrowRight') nextIndex = (currentIndex + 1) % tabs.length;
-            if (e.key === 'ArrowLeft') nextIndex = (currentIndex - 1 + tabs.length) % tabs.length;
-            if (e.key === 'Home') nextIndex = 0;
-            if (e.key === 'End') nextIndex = tabs.length - 1;
-            tabs[nextIndex].focus();
-            tabs[nextIndex].click();
-        });
-    }
+    // Tabs removed: skip ARIA setup for tabs
 
     // Modal ARIA attributes
     const actorOverlay = document.getElementById('actorModalOverlay');
@@ -873,6 +829,9 @@ function updateServerConfig() {
             </svg>
         </button>`;
     }
+
+    // Also refresh unified Integrations outputs (visible MCP URL and examples)
+    try { updateIntegrationsPage(); } catch (_) { /* no-op */ }
 }
 
 // Utility functions
@@ -897,20 +856,8 @@ function getStableRating(actor) {
 
 // This function is now defined as window.copyToClipboard below
 
-// Tab management
-function switchTab(tabName) {
-    activeTab = tabName;
-    
-    // Update tab buttons
-    document.querySelectorAll('.tab-button').forEach(button => {
-        button.classList.toggle('active', button.dataset.tab === tabName);
-    });
-    
-    // Update tab content
-    document.querySelectorAll('.tab-content').forEach(content => {
-        content.classList.toggle('active', content.id === tabName);
-    });
-}
+// Tab management removed in unified flow
+function switchTab() { /* no-op */ }
 
 
 // Search UI helpers
@@ -2127,11 +2074,5 @@ console.log("Available tools:", tools.map(t => t.name));`.trim();
     }
 }
 
-// Call updateIntegrationsPage when switching to Integrations tab
-const originalSwitchTab = window.switchTab;
-window.switchTab = function(tabName) {
-    originalSwitchTab(tabName);
-    if (tabName === 'integrations') {
-        updateIntegrationsPage();
-    }
-};
+// Always keep integrations content up-to-date in unified flow
+window.switchTab = function() { /* no-op for compatibility */ };
