@@ -21,7 +21,7 @@ const TOOLS_DATA = [
     {
         id: 'tool_apify_storage',
         name: 'Apify storage',
-        description: 'Access and manage your data stored in Apify\'s datasets and key-value stores.',
+        description: "Access and manage your data stored in Apify's datasets and key-value stores.",
         category: 'optional'
     }
 ];
@@ -779,34 +779,34 @@ function generateServerConfig() {
 
 function generateMcpUrl() {
     const baseUrl = "https://mcp.apify.com/";
-    const params = new URLSearchParams();
-    
+    const queryParams = [];
+
     if (enableDynamicActors === false) {
-        params.append("enableAddingActors", "false");
+        queryParams.push("enableAddingActors=false");
     }
-    
+
     if (selectedActors.length > 0) {
         const actorPaths = selectedActors.map((actor) => actor.path).join(",");
-        params.append("actors", actorPaths);
+        // Do not URL-encode slashes and commas so the URL stays human-readable
+        queryParams.push(`actors=${actorPaths}`);
     }
-    
+
     if (selectedTools.length > 0) {
         const toolMapping = {
             tool_actor_runs: "runs",
             tool_apify_storage: "storage",
         };
-        
+
         const mappedTools = selectedTools
             .map((toolId) => toolMapping[toolId])
             .filter((tool, index, arr) => tool && arr.indexOf(tool) === index);
-        
+
         if (mappedTools.length > 0) {
-            params.append("tools", mappedTools.join(","));
+            queryParams.push(`tools=${mappedTools.join(",")}`);
         }
     }
-    
-    const queryString = params.toString();
-    return queryString ? `${baseUrl}?${queryString}` : baseUrl;
+
+    return queryParams.length ? `${baseUrl}?${queryParams.join("&")}` : baseUrl;
 }
 
 function updateServerConfig() {
@@ -1050,7 +1050,7 @@ window.showIntegrationDetails = function(integration) {
                         <li>Click <strong>Edit Config</strong> to open the configuration file:
                             <ul>
                                 <li>macOS: <code>~/Library/Application Support/Claude/claude_desktop_config.json</code></li>
-                                <li>Windows: <code>%APPDATA%\\Claude\\claude_desktop_config.json</code></li>
+                                <li>Windows: <code>%APPDATA%\Claude\claude_desktop_config.json</code></li>
                             </ul>
                         </li>
                         <li>
@@ -1436,11 +1436,11 @@ window.showIntegrationDetails = function(integration) {
                     <div class="platform-content">
                         <div class="platform-panel active" data-platform-panel="anthropic-curl">
                             <div class="code-block">
-<pre><code class="language-bash">curl https://api.anthropic.com/v1/messages \
- -H "Content-Type: application/json" \
- -H "X-API-Key: $ANTHROPIC_API_KEY" \
- -H "anthropic-version: 2023-06-01" \
- -H "anthropic-beta: mcp-client-2025-04-04" \
+<pre><code class="language-bash">curl https://api.anthropic.com/v1/messages
+ -H "Content-Type: application/json"
+ -H "X-API-Key: $ANTHROPIC_API_KEY"
+ -H "anthropic-version: 2023-06-01"
+ -H "anthropic-beta: mcp-client-2025-04-04"
  -d '{
    "model": "claude-sonnet-4-20250514",
    "max_tokens": 1000,
@@ -1613,9 +1613,9 @@ print(response)</code></pre>
                     <div class="platform-content">
                         <div class="platform-panel active" data-platform-panel="openai-curl">
                             <div class="code-block">
-<pre><code class="language-bash">curl --location 'https://api.openai.com/v1/responses' \
---header 'Content-Type: application/json' \
---header "Authorization: Bearer $OPENAI_API_KEY" \
+<pre><code class="language-bash">curl --location 'https://api.openai.com/v1/responses'
+--header 'Content-Type: application/json'
+--header "Authorization: Bearer $OPENAI_API_KEY"
 --data '{
   "model": "gpt-4.1",
   "tools": [
