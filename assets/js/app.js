@@ -1034,11 +1034,30 @@ window.showIntegrationDetails = function(integration) {
         'gemini-cli': { name: 'Gemini CLI', icon: 'assets/images/gemini.png' },
         'anthropic-api': { name: 'Anthropic API', icon: 'assets/images/anthropic.png' },
         'openai-api': { name: 'OpenAI API', icon: 'assets/images/openai.png' },
-        'json-config': { name: 'JSON Config', icon: 'assets/images/json.png' }
+        'json-config': { name: 'JSON Config', icon: 'assets/images/json.png' },
+        'tester-mcp-client': { name: 'Tester MCP Client', icon: 'assets/images/tester.jpg' }
     };
 
     // Integration details content
     const integrationDetails = {
+        'tester-mcp-client': {
+            title: 'Tester MCP Client',
+            content: `
+                <div class="integration-step">
+                    <p>Use Apify's own <strong>Tester MCP Client</strong> as a standalone Apify Actor. Paste your MCP configuration URL and start the Actor <a href="https://console.apify.com/actors/BEwUoGEsRUQC2iUPa/input" target="_blank" rel="noopener noreferrer">in the Apify Console</a>.</p>
+                    <p class="text-sm text-muted-foreground" style="margin-top:0.25rem;">Ideal for quickly verifying your server configuration without installing any local client.</p>
+                    <div class="url-field" style="margin-top:0.75rem;">
+                        <span id="testerMcpUrl">${generateMcpUrl()}</span>
+                        <button class="copy-btn" aria-label="Copy server URL" onclick="copyToClipboard('testerMcpUrl', this)">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            `
+        },
         'claude': {
             title: 'Connect to Claude Desktop',
             content: `
