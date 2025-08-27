@@ -219,6 +219,10 @@ a:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; border-ra
     margin-top: 2rem;
 }
 
+.sidebar-info + .sidebar-info {
+    margin-top: 0.75rem;
+}
+
 /* Docs callout styles removed - now using btn-secondary styling */
 
 .sidebar-header {
