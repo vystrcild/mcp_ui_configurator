@@ -1,35 +1,179 @@
-// Tools data
-const TOOLS_DATA = [
-    {
-        id: 'tool_actor_discovery',
-        name: 'Actor discovery and management',
-        description: 'Search for Actors, view details, and dynamically add them to your server.',
-        category: 'default'
-    },
-    {
-        id: 'tool_apify_docs',
-        name: 'Apify documentation',
-        description: 'Search Apify documentation and fetch specific documents for development help.',
-        category: 'default'
-    },
-    {
-        id: 'tool_actor_runs',
-        name: 'Actor runs',
-        description: 'Monitor and manage your Actor executions, view results, and access logs.',
-        category: 'optional'
-    },
-    {
-        id: 'tool_apify_storage',
-        name: 'Apify storage',
-        description: "Access and manage your data stored in Apify's datasets and key-value stores.",
-        category: 'optional'
-    }
-];
+// Tools data - v2 structure with individual tool selection
+const TOOLS_DATA = {
+    // Tool definitions with category grouping for UI display
+    tools: [
+        // actors category
+        {
+            id: 'search-actors',
+            name: 'Search Actors',
+            description: 'Search for Actors in the Apify Store',
+            category: 'actors',
+            categoryName: 'Actor Management',
+            defaultEnabled: true
+        },
+        {
+            id: 'fetch-actor-details',
+            name: 'Actor Details', 
+            description: 'Retrieve detailed information about a specific Actor',
+            category: 'actors',
+            categoryName: 'Actor Management',
+            defaultEnabled: true
+        },
+        {
+            id: 'call-actor',
+            name: 'Call Actor',
+            description: 'Generic tool to call any Actor by ID and input',
+            category: 'actors', 
+            categoryName: 'Actor Management',
+            defaultEnabled: true
+        },
+        // docs category
+        {
+            id: 'search-apify-docs',
+            name: 'Search Documentation',
+            description: 'Search the Apify documentation',
+            category: 'docs',
+            categoryName: 'Documentation',
+            defaultEnabled: true
+        },
+        {
+            id: 'fetch-apify-docs',
+            name: 'Fetch Documentation',
+            description: 'Fetch the full content of a documentation page',
+            category: 'docs',
+            categoryName: 'Documentation', 
+            defaultEnabled: true
+        },
+        // experimental category
+        {
+            id: 'add-actor',
+            name: 'Dynamic Actor Addition',
+            description: 'Add an Actor as a new tool for the session',
+            category: 'experimental',
+            categoryName: 'Experimental Features',
+            defaultEnabled: false
+        },
+        // runs category
+        {
+            id: 'get-actor-run',
+            name: 'Get Actor Run',
+            description: 'Get detailed information about a specific Actor run',
+            category: 'runs',
+            categoryName: 'Actor Runs',
+            defaultEnabled: false
+        },
+        {
+            id: 'get-actor-run-list',
+            name: 'List Actor Runs',
+            description: 'Get a list of an Actor\'s runs, filterable by status',
+            category: 'runs',
+            categoryName: 'Actor Runs', 
+            defaultEnabled: false
+        },
+        {
+            id: 'get-actor-log',
+            name: 'Get Run Logs',
+            description: 'Retrieve the logs for a specific Actor run',
+            category: 'runs',
+            categoryName: 'Actor Runs',
+            defaultEnabled: false
+        },
+        // storage category
+        {
+            id: 'get-dataset',
+            name: 'Get Dataset',
+            description: 'Get metadata about a specific dataset',
+            category: 'storage',
+            categoryName: 'Data Storage',
+            defaultEnabled: false
+        },
+        {
+            id: 'get-dataset-items',
+            name: 'Get Dataset Items',
+            description: 'Retrieve dataset items with pagination/filtering',
+            category: 'storage',
+            categoryName: 'Data Storage',
+            defaultEnabled: false
+        },
+        {
+            id: 'get-dataset-list',
+            name: 'List Datasets',
+            description: 'List all datasets for the user',
+            category: 'storage',
+            categoryName: 'Data Storage',
+            defaultEnabled: false
+        },
+        {
+            id: 'get-dataset-schema',
+            name: 'Get Dataset Schema',
+            description: 'Get the JSON schema of dataset items',
+            category: 'storage',
+            categoryName: 'Data Storage',
+            defaultEnabled: false
+        },
+        {
+            id: 'get-key-value-store',
+            name: 'Get Key-Value Store',
+            description: 'Get metadata for a key-value store',
+            category: 'storage',
+            categoryName: 'Data Storage',
+            defaultEnabled: false
+        },
+        {
+            id: 'get-key-value-store-keys',
+            name: 'List Store Keys',
+            description: 'List keys in a specific key-value store',
+            category: 'storage',
+            categoryName: 'Data Storage',
+            defaultEnabled: false
+        },
+        {
+            id: 'get-key-value-store-record',
+            name: 'Get Store Record',
+            description: 'Get a value by key from a key-value store',
+            category: 'storage',
+            categoryName: 'Data Storage',
+            defaultEnabled: false
+        },
+        {
+            id: 'get-key-value-store-list',
+            name: 'List Key-Value Stores',
+            description: 'List all key-value stores',
+            category: 'storage',
+            categoryName: 'Data Storage',
+            defaultEnabled: false
+        }
+    ],
+    // Categories for UI organization
+    categories: [
+        { id: 'actors', name: 'Actor Management', description: 'Search, discover, and call Apify Actors' },
+        { id: 'docs', name: 'Documentation', description: 'Search and access Apify documentation' },
+        { id: 'experimental', name: 'Experimental Features', description: 'Beta features for advanced users' },
+        { id: 'runs', name: 'Actor Runs', description: 'Monitor and manage Actor executions' },
+        { id: 'storage', name: 'Data Storage', description: 'Access datasets and key-value stores' }
+    ],
+    // Default actors (separate from tools)
+    defaultActors: [
+        {
+            id: 'apify/rag-web-browser',
+            name: 'RAG Web Browser',
+            description: 'Preloaded Actor for browsing the web via RAG',
+            defaultEnabled: true
+        }
+    ]
+};
 
-// Global state
-let selectedActors = [];
-let selectedTools = ['tool_actor_discovery']; // Actor discovery selected by default
-let enableDynamicActors = true;
+// Global state - v2: Track individual tools that are enabled
+let selectedActors = []; // User-selected actors only (default actors handled invisibly by server)
+let selectedTools = [
+    // Default enabled tools from v2 spec
+    'search-actors',
+    'fetch-actor-details', 
+    'call-actor',
+    'search-apify-docs',
+    'fetch-apify-docs'
+];
+// Note: enableDynamicActors removed - now controlled by 'add-actor' tool selection
 let modalSelection = [];
 let filteredActors = [];
 let searchResults = [];
@@ -137,7 +281,7 @@ function init() {
         actorModalOverlay: document.getElementById('actorModalOverlay'),
         actorsGrid: document.getElementById('actorsGrid'),
         actorSearch: document.getElementById('actorSearch'),
-        enableDynamicActors: document.getElementById('enableDynamicActors')
+        // enableDynamicActors removed - now handled by 'add-actor' tool selection
     };
     
     if (typeof window !== 'undefined' && window.__DEBUG__ !== false) {
@@ -236,10 +380,7 @@ function setupEventListeners() {
     });
     
     // Dynamic actors checkbox
-    elements.enableDynamicActors.addEventListener('change', (e) => {
-        enableDynamicActors = e.target.checked;
-        updateServerConfig();
-    });
+    // enableDynamicActors event listener removed - now handled by 'add-actor' tool selection
     
     
     // Close modal when clicking overlay
@@ -394,62 +535,47 @@ function renderSelectedActors() {
 function renderToolsGrid() {
     elements.toolsGrid.innerHTML = '';
     
-    // Default Tools Section
-    const defaultSection = document.createElement('div');
-    defaultSection.className = 'tools-section';
-    defaultSection.innerHTML = `
-        <h4 class="tools-section-title">Default Tools</h4>
-        <p class="tools-section-description">These tools are always available and cannot be disabled.</p>
-    `;
-    
-    const defaultTools = TOOLS_DATA.filter(tool => tool.category === 'default');
-    defaultTools.forEach(tool => {
-        const toolItem = document.createElement('div');
-        toolItem.className = 'tool-item default';
-        toolItem.innerHTML = `
-            <div class="tool-checkbox">
-                <input type="checkbox" checked disabled>
-                <span class="checkmark"></span>
-            </div>
-            <div class="tool-content">
-                <div class="tool-name">${tool.name}</div>
-                <div class="tool-description">${tool.description}</div>
-            </div>
-        `;
-        defaultSection.appendChild(toolItem);
-    });
-    
-    elements.toolsGrid.appendChild(defaultSection);
-    
-    // Optional Tools Section
-    const optionalSection = document.createElement('div');
-    optionalSection.className = 'tools-section';
-    optionalSection.innerHTML = `
-        <h4 class="tools-section-title">Optional Tools</h4>
-        <p class="tools-section-description">These tools must be explicitly enabled and will be included in the server configuration.</p>
-    `;
-    
-    const optionalTools = TOOLS_DATA.filter(tool => tool.category === 'optional');
-    optionalTools.forEach(tool => {
-        const isSelected = selectedTools.includes(tool.id);
+    // Group tools by category for v2 UI - compact version
+    TOOLS_DATA.categories.forEach(category => {
+        const categoryTools = TOOLS_DATA.tools.filter(tool => tool.category === category.id);
+        if (categoryTools.length === 0) return;
         
-        const toolItem = document.createElement('div');
-        toolItem.className = 'tool-item optional';
-        toolItem.onclick = () => window.toggleTool(tool.id);
-        toolItem.innerHTML = `
-            <div class="tool-checkbox">
-                <input type="checkbox" ${isSelected ? 'checked' : ''}>
-                <span class="checkmark"></span>
+        const categorySection = document.createElement('div');
+        categorySection.className = 'tools-category';
+        
+        // Category header with select all
+        const selectedInCategory = categoryTools.filter(tool => selectedTools.includes(tool.id)).length;
+        const allInCategory = categoryTools.length;
+        const isAllSelected = selectedInCategory === allInCategory;
+        
+        categorySection.innerHTML = `
+            <div class="category-header">
+                <h4 class="category-title">${category.name}</h4>
+                <label class="select-all">
+                    <input type="checkbox" ${isAllSelected ? 'checked' : ''} 
+                           onchange="window.toggleCategoryTools('${category.id}')">
+                    <span>Select all</span>
+                </label>
             </div>
-            <div class="tool-content">
-                <div class="tool-name">${tool.name}</div>
-                <div class="tool-description">${tool.description}</div>
+            <div class="tools-list">
+                ${categoryTools.map(tool => {
+                    const isSelected = selectedTools.includes(tool.id);
+                    return `
+                        <label class="tool-item ${isSelected ? 'selected' : ''}">
+                            <input type="checkbox" ${isSelected ? 'checked' : ''} 
+                                   onchange="window.toggleTool('${tool.id}')">
+                            <div class="tool-info">
+                                <span class="tool-name">${escapeHTML(tool.name)}</span>
+                                <span class="tool-desc">${escapeHTML(tool.description)}</span>
+                            </div>
+                        </label>
+                    `;
+                }).join('')}
             </div>
         `;
-        optionalSection.appendChild(toolItem);
+        
+        elements.toolsGrid.appendChild(categorySection);
     });
-    
-    elements.toolsGrid.appendChild(optionalSection);
 }
 
 function renderActorsGrid() {
@@ -746,21 +872,70 @@ window.toggleTool = function(toolId) {
     updateServerConfig();
 }
 
+window.toggleCategoryTools = function(categoryId) {
+    const categoryTools = TOOLS_DATA.tools.filter(tool => tool.category === categoryId);
+    const selectedInCategory = categoryTools.filter(tool => selectedTools.includes(tool.id));
+    const allSelected = selectedInCategory.length === categoryTools.length;
+    
+    if (allSelected) {
+        // Deselect all tools in this category
+        categoryTools.forEach(tool => {
+            selectedTools = selectedTools.filter(id => id !== tool.id);
+        });
+    } else {
+        // Select all tools in this category
+        categoryTools.forEach(tool => {
+            if (!selectedTools.includes(tool.id)) {
+                selectedTools.push(tool.id);
+            }
+        });
+    }
+    
+    renderToolsGrid();
+    updateServerConfig();
+}
+
 // Configuration generation
 function generateServerConfig() {
     const serverName = "Apify-mcp-server";
     
-    const toolMapping = {
-        tool_actor_runs: "runs",
-        tool_apify_storage: "storage",
-    };
+    // Generate the same tools parameter as the URL for consistency
+    const allSelectedTools = [];
     
-    const mappedTools = selectedTools
-        .map(toolId => toolMapping[toolId])
-        .filter((tool, index, arr) => tool && arr.indexOf(tool) === index);
+    // Smart optimization: if all tools in a category are selected, use category name
+    const toolsByCategory = {};
+    TOOLS_DATA.tools.forEach(tool => {
+        if (!toolsByCategory[tool.category]) {
+            toolsByCategory[tool.category] = { all: [], selected: [] };
+        }
+        toolsByCategory[tool.category].all.push(tool.id);
+        if (selectedTools.includes(tool.id)) {
+            toolsByCategory[tool.category].selected.push(tool.id);
+        }
+    });
     
-    const toolsArg = mappedTools.length > 0 ? `--tools=${mappedTools.join(",")}` : "";
-    const actorsArg = selectedActors.length > 0 ? `--actors=${selectedActors.map((a) => a.path).join(",")}` : "";
+    // For each category, decide whether to use category name or individual tools
+    Object.keys(toolsByCategory).forEach(categoryId => {
+        const category = toolsByCategory[categoryId];
+        if (category.selected.length === 0) {
+            return;
+        } else if (category.selected.length === category.all.length) {
+            allSelectedTools.push(categoryId);
+        } else {
+            allSelectedTools.push(...category.selected);
+        }
+    });
+    
+    // Add selected individual actors
+    if (selectedActors.length > 0) {
+        selectedActors.forEach(actorPath => {
+            const path = typeof actorPath === 'string' ? actorPath : actorPath.path;
+            allSelectedTools.push(path);
+        });
+    }
+    
+    const toolsArg = allSelectedTools.length > 0 ? `--tools=${allSelectedTools.join(",")}` : "";
+    const actorsArg = "";
     
     const additionalArgs = [actorsArg, toolsArg].filter((arg) => arg !== "");
     const args = ["-y", "@apify/actors-mcp-server", ...additionalArgs];
@@ -780,32 +955,62 @@ function generateServerConfig() {
 function generateMcpUrl() {
     const baseUrl = "https://mcp.apify.com/";
     const queryParams = [];
-
-    if (enableDynamicActors === false) {
-        queryParams.push("enableAddingActors=false");
-    }
-
-    if (selectedActors.length > 0) {
-        const actorPaths = selectedActors.map((actor) => actor.path).join(",");
-        // Do not URL-encode slashes and commas so the URL stays human-readable
-        queryParams.push(`actors=${actorPaths}`);
-    }
-
-    if (selectedTools.length > 0) {
-        const toolMapping = {
-            tool_actor_runs: "runs",
-            tool_apify_storage: "storage",
-        };
-
-        const mappedTools = selectedTools
-            .map((toolId) => toolMapping[toolId])
-            .filter((tool, index, arr) => tool && arr.indexOf(tool) === index);
-
-        if (mappedTools.length > 0) {
-            queryParams.push(`tools=${mappedTools.join(",")}`);
+    const allSelectedTools = [];
+    
+    // Smart optimization: if all tools in a category are selected, use category name
+    // Otherwise, use individual tool names
+    const toolsByCategory = {};
+    TOOLS_DATA.tools.forEach(tool => {
+        if (!toolsByCategory[tool.category]) {
+            toolsByCategory[tool.category] = { all: [], selected: [] };
         }
+        toolsByCategory[tool.category].all.push(tool.id);
+        if (selectedTools.includes(tool.id)) {
+            toolsByCategory[tool.category].selected.push(tool.id);
+        }
+    });
+    
+    // For each category, decide whether to use category name or individual tools
+    Object.keys(toolsByCategory).forEach(categoryId => {
+        const category = toolsByCategory[categoryId];
+        if (category.selected.length === 0) {
+            // No tools selected from this category
+            return;
+        } else if (category.selected.length === category.all.length) {
+            // All tools selected - use category name for optimization
+            allSelectedTools.push(categoryId);
+        } else {
+            // Some tools selected - use individual tool names
+            allSelectedTools.push(...category.selected);
+        }
+    });
+    
+    // Add selected individual actors
+    if (selectedActors.length > 0) {
+        selectedActors.forEach(actorPath => {
+            // Handle both string paths and actor objects
+            const path = typeof actorPath === 'string' ? actorPath : actorPath.path;
+            allSelectedTools.push(path);
+        });
     }
-
+    
+    // Check if current selection matches server defaults exactly
+    const defaultTools = ['search-actors', 'fetch-actor-details', 'call-actor', 'search-apify-docs', 'fetch-apify-docs'];
+    const isDefaultSelection = 
+        selectedTools.length === defaultTools.length &&
+        selectedTools.every(tool => defaultTools.includes(tool)) &&
+        selectedActors.length === 0; // No user-selected actors (server includes rag-web-browser by default)
+    
+    // If using defaults, return base URL (let server handle defaults)
+    if (isDefaultSelection) {
+        return baseUrl;
+    }
+    
+    // Otherwise, include tools parameter
+    if (allSelectedTools.length > 0) {
+        queryParams.push(`tools=${allSelectedTools.join(",")}`);
+    }
+    
     return queryParams.length ? `${baseUrl}?${queryParams.join("&")}` : baseUrl;
 }
 
@@ -1898,21 +2103,47 @@ function buildJsonConfig(platform) {
 
     // Default to local (command-based) configuration
     const serverName = 'apify';
-    const actorsList = selectedActors.length > 0 ? selectedActors.map(a => a.path).join(',') : undefined;
-    const toolMapping = {
-        tool_actor_runs: 'runs',
-        tool_apify_storage: 'storage',
-    };
-    const mappedTools = selectedTools
-        .map(id => toolMapping[id])
-        .filter((t, i, arr) => t && arr.indexOf(t) === i);
+    
+    // Generate the same tools parameter as the URL for consistency
+    const allSelectedTools = [];
+    
+    // Smart optimization: if all tools in a category are selected, use category name
+    const toolsByCategory = {};
+    TOOLS_DATA.tools.forEach(tool => {
+        if (!toolsByCategory[tool.category]) {
+            toolsByCategory[tool.category] = { all: [], selected: [] };
+        }
+        toolsByCategory[tool.category].all.push(tool.id);
+        if (selectedTools.includes(tool.id)) {
+            toolsByCategory[tool.category].selected.push(tool.id);
+        }
+    });
+    
+    // For each category, decide whether to use category name or individual tools
+    Object.keys(toolsByCategory).forEach(categoryId => {
+        const category = toolsByCategory[categoryId];
+        if (category.selected.length === 0) {
+            return;
+        } else if (category.selected.length === category.all.length) {
+            allSelectedTools.push(categoryId);
+        } else {
+            allSelectedTools.push(...category.selected);
+        }
+    });
+    
+    // Add selected individual actors
+    if (selectedActors.length > 0) {
+        selectedActors.forEach(actorPath => {
+            const path = typeof actorPath === 'string' ? actorPath : actorPath.path;
+            allSelectedTools.push(path);
+        });
+    }
+    
     const server = {};
     server.command = 'npx';
     server.args = ['-y', '@apify/actors-mcp-server'];
     const optionalArgs = [];
-    if (actorsList && actorsList.length > 0) optionalArgs.push('--actors', actorsList);
-    if (mappedTools.length > 0) optionalArgs.push('--tools', mappedTools.join(','));
-    if (enableDynamicActors === false) optionalArgs.push('--enable-adding-actors', 'false');
+    if (allSelectedTools.length > 0) optionalArgs.push('--tools', allSelectedTools.join(','));
     server.args = server.args.concat(optionalArgs);
     if (includeTokenInJsonConfig) server.env = { APIFY_TOKEN: '<your-apify-token>' };
     return JSON.stringify({ mcpServers: { [serverName]: server } }, null, 2);
@@ -1949,14 +2180,40 @@ function buildVsCodeConfig(platform) {
     }
 
     // Local (stdio) configuration
-    const actorsList = selectedActors.length > 0 ? selectedActors.map(a => a.path).join(',') : undefined;
-    const toolMapping = {
-        tool_actor_runs: 'runs',
-        tool_apify_storage: 'storage',
-    };
-    const mappedTools = selectedTools
-        .map(id => toolMapping[id])
-        .filter((t, i, arr) => t && arr.indexOf(t) === i);
+    // Generate the same tools parameter as the URL for consistency
+    const allSelectedTools = [];
+    
+    // Smart optimization: if all tools in a category are selected, use category name
+    const toolsByCategory = {};
+    TOOLS_DATA.tools.forEach(tool => {
+        if (!toolsByCategory[tool.category]) {
+            toolsByCategory[tool.category] = { all: [], selected: [] };
+        }
+        toolsByCategory[tool.category].all.push(tool.id);
+        if (selectedTools.includes(tool.id)) {
+            toolsByCategory[tool.category].selected.push(tool.id);
+        }
+    });
+    
+    // For each category, decide whether to use category name or individual tools
+    Object.keys(toolsByCategory).forEach(categoryId => {
+        const category = toolsByCategory[categoryId];
+        if (category.selected.length === 0) {
+            return;
+        } else if (category.selected.length === category.all.length) {
+            allSelectedTools.push(categoryId);
+        } else {
+            allSelectedTools.push(...category.selected);
+        }
+    });
+    
+    // Add selected individual actors
+    if (selectedActors.length > 0) {
+        selectedActors.forEach(actorPath => {
+            const path = typeof actorPath === 'string' ? actorPath : actorPath.path;
+            allSelectedTools.push(path);
+        });
+    }
 
     const server = {
         // stdio (local) - omit explicit type per request
@@ -1964,9 +2221,7 @@ function buildVsCodeConfig(platform) {
         args: ['-y', '@apify/actors-mcp-server'],
     };
     const optionalArgs = [];
-    if (actorsList && actorsList.length > 0) optionalArgs.push('--actors', actorsList);
-    if (mappedTools.length > 0) optionalArgs.push('--tools', mappedTools.join(','));
-    if (enableDynamicActors === false) optionalArgs.push('--enable-adding-actors', 'false');
+    if (allSelectedTools.length > 0) optionalArgs.push('--tools', allSelectedTools.join(','));
     server.args = server.args.concat(optionalArgs);
     if (includeTokenInJsonConfig) server.env = { APIFY_TOKEN: '${input:apify-token}' };
 
