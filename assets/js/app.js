@@ -8,15 +8,15 @@ const TOOLS_DATA = {
             name: 'Search Actors',
             description: 'Search for Actors in the Apify Store',
             category: 'actors',
-            categoryName: 'Actor Management',
+            categoryName: 'Actor management',
             defaultEnabled: true
         },
         {
             id: 'fetch-actor-details',
-            name: 'Actor Details', 
+            name: 'Actor details', 
             description: 'Retrieve detailed information about a specific Actor',
             category: 'actors',
-            categoryName: 'Actor Management',
+            categoryName: 'Actor management',
             defaultEnabled: true
         },
         {
@@ -24,13 +24,13 @@ const TOOLS_DATA = {
             name: 'Call Actor',
             description: 'Generic tool to call any Actor by ID and input',
             category: 'actors', 
-            categoryName: 'Actor Management',
+            categoryName: 'Actor management',
             defaultEnabled: true
         },
         // docs category
         {
             id: 'search-apify-docs',
-            name: 'Search Documentation',
+            name: 'Search documentation',
             description: 'Search the Apify documentation',
             category: 'docs',
             categoryName: 'Documentation',
@@ -38,7 +38,7 @@ const TOOLS_DATA = {
         },
         {
             id: 'fetch-apify-docs',
-            name: 'Fetch Documentation',
+            name: 'Fetch documentation',
             description: 'Fetch the full content of a documentation page',
             category: 'docs',
             categoryName: 'Documentation', 
@@ -47,116 +47,116 @@ const TOOLS_DATA = {
         // experimental category
         {
             id: 'add-actor',
-            name: 'Dynamic Actor Addition',
+            name: 'Dynamic Actor addition',
             description: 'Add an Actor as a new tool for the session',
             category: 'experimental',
-            categoryName: 'Experimental Features',
+            categoryName: 'Experimental features',
             defaultEnabled: false
         },
         // runs category
         {
             id: 'get-actor-run',
-            name: 'Get Actor Run',
+            name: 'Get Actor run',
             description: 'Get detailed information about a specific Actor run',
             category: 'runs',
-            categoryName: 'Actor Runs',
+            categoryName: 'Actor runs',
             defaultEnabled: false
         },
         {
             id: 'get-actor-run-list',
-            name: 'List Actor Runs',
+            name: 'List Actor runs',
             description: 'Get a list of an Actor\'s runs, filterable by status',
             category: 'runs',
-            categoryName: 'Actor Runs', 
+            categoryName: 'Actor runs', 
             defaultEnabled: false
         },
         {
             id: 'get-actor-log',
-            name: 'Get Run Logs',
+            name: 'Get run logs',
             description: 'Retrieve the logs for a specific Actor run',
             category: 'runs',
-            categoryName: 'Actor Runs',
+            categoryName: 'Actor runs',
             defaultEnabled: false
         },
         // storage category
         {
             id: 'get-dataset',
-            name: 'Get Dataset',
+            name: 'Get dataset',
             description: 'Get metadata about a specific dataset',
             category: 'storage',
-            categoryName: 'Data Storage',
+            categoryName: 'Data storage',
             defaultEnabled: false
         },
         {
             id: 'get-dataset-items',
-            name: 'Get Dataset Items',
+            name: 'Get dataset items',
             description: 'Retrieve dataset items with pagination/filtering',
             category: 'storage',
-            categoryName: 'Data Storage',
+            categoryName: 'Data storage',
             defaultEnabled: false
         },
         {
             id: 'get-dataset-list',
-            name: 'List Datasets',
+            name: 'List datasets',
             description: 'List all datasets for the user',
             category: 'storage',
-            categoryName: 'Data Storage',
+            categoryName: 'Data storage',
             defaultEnabled: false
         },
         {
             id: 'get-dataset-schema',
-            name: 'Get Dataset Schema',
+            name: 'Get dataset schema',
             description: 'Get the JSON schema of dataset items',
             category: 'storage',
-            categoryName: 'Data Storage',
+            categoryName: 'Data storage',
             defaultEnabled: false
         },
         {
             id: 'get-key-value-store',
-            name: 'Get Key-Value Store',
+            name: 'Get key-value store',
             description: 'Get metadata for a key-value store',
             category: 'storage',
-            categoryName: 'Data Storage',
+            categoryName: 'Data storage',
             defaultEnabled: false
         },
         {
             id: 'get-key-value-store-keys',
-            name: 'List Store Keys',
+            name: 'List store keys',
             description: 'List keys in a specific key-value store',
             category: 'storage',
-            categoryName: 'Data Storage',
+            categoryName: 'Data storage',
             defaultEnabled: false
         },
         {
             id: 'get-key-value-store-record',
-            name: 'Get Store Record',
+            name: 'Get store record',
             description: 'Get a value by key from a key-value store',
             category: 'storage',
-            categoryName: 'Data Storage',
+            categoryName: 'Data storage',
             defaultEnabled: false
         },
         {
             id: 'get-key-value-store-list',
-            name: 'List Key-Value Stores',
+            name: 'List key-value stores',
             description: 'List all key-value stores',
             category: 'storage',
-            categoryName: 'Data Storage',
+            categoryName: 'Data storage',
             defaultEnabled: false
         }
     ],
     // Categories for UI organization
     categories: [
-        { id: 'actors', name: 'Actor Management', description: 'Search, discover, and call Apify Actors' },
+        { id: 'actors', name: 'Actor management', description: 'Search, discover, and call Apify Actors' },
         { id: 'docs', name: 'Documentation', description: 'Search and access Apify documentation' },
-        { id: 'experimental', name: 'Experimental Features', description: 'Beta features for advanced users' },
-        { id: 'runs', name: 'Actor Runs', description: 'Monitor and manage Actor executions' },
-        { id: 'storage', name: 'Data Storage', description: 'Access datasets and key-value stores' }
+        { id: 'experimental', name: 'Experimental features', description: 'Beta features for advanced users' },
+        { id: 'runs', name: 'Actor runs', description: 'Monitor and manage Actor executions' },
+        { id: 'storage', name: 'Data storage', description: 'Access datasets and key-value stores' }
     ],
     // Default actors (separate from tools)
     defaultActors: [
         {
             id: 'apify/rag-web-browser',
-            name: 'RAG Web Browser',
+            name: 'RAG web browser',
             description: 'Preloaded Actor for browsing the web via RAG',
             defaultEnabled: true
         }

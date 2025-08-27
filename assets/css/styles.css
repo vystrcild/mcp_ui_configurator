@@ -219,73 +219,7 @@ a:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; border-ra
     margin-top: 2rem;
 }
 
-.docs-callout {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 1.25rem;
-    background: linear-gradient(135deg, var(--primary-light) 0%, var(--accent-light) 100%);
-    border: 1px solid transparent;
-    border-radius: var(--radius-lg);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    overflow: hidden;
-}
-
-.docs-callout::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    padding: 1px;
-    background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
-    border-radius: var(--radius-lg);
-    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    mask-composite: exclude;
-    -webkit-mask-composite: xor;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.docs-callout:hover::before {
-    opacity: 1;
-}
-
-.docs-callout:hover {
-    background: linear-gradient(135deg, var(--primary-light) 0%, var(--accent-light) 100%);
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-md);
-}
-
-.docs-callout svg {
-    color: var(--primary);
-    flex-shrink: 0;
-    margin-top: 0;
-    width: 1.25rem;
-    height: 1.25rem;
-}
-
-.docs-title {
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--foreground);
-    margin: 0 0 0.25rem 0;
-}
-
-.docs-link {
-    font-size: 0.875rem;
-    color: var(--primary);
-    text-decoration: none;
-    font-weight: 500;
-    transition: all 0.2s ease;
-    cursor: pointer;
-    position: relative;
-    z-index: 10;
-}
-
-.docs-link:hover {
-    text-decoration: none;
-    color: var(--primary);
-}
+/* Docs callout styles removed - now using btn-secondary styling */
 
 .sidebar-header {
     display: flex;
@@ -328,8 +262,9 @@ a:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; border-ra
     display: block; /* default on desktop */
 }
 
-/* Make feedback button match width of docs callout and keep native btn visuals but without glow */
-.feedback-button {
+/* Make feedback button and docs button match width and keep native btn visuals but without glow */
+.feedback-button,
+.docs-button {
     display: flex;
     width: 100%;
     justify-content: center;
@@ -337,26 +272,35 @@ a:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; border-ra
     text-decoration: none !important;
 }
 
-.feedback-button::before { content: none !important; }
-.feedback-button::after { content: none !important; }
-.feedback-button:hover { transform: none; box-shadow: none; text-decoration: none !important; }
+.feedback-button::before,
+.docs-button::before { content: none !important; }
+.feedback-button::after,
+.docs-button::after { content: none !important; }
+.feedback-button:hover,
+.docs-button:hover { transform: none; box-shadow: none; text-decoration: none !important; }
 
 /* Prevent icon scaling/animation on hover */
-.feedback-button svg { transition: none; transform: none; }
-.feedback-button:hover svg { transform: none; }
+.feedback-button svg,
+.docs-button svg { transition: none; transform: none; }
+.feedback-button:hover svg,
+.docs-button:hover svg { transform: none; }
 
 /* Ensure no glow/ring/shadow on any interaction state */
 .feedback-button:focus,
 .feedback-button:focus-visible,
-.feedback-button:active {
+.feedback-button:active,
+.docs-button:focus,
+.docs-button:focus-visible,
+.docs-button:active {
     box-shadow: none !important; /* strip glow */
     transform: none !important;
 }
 /* Keep transitions normal for consistency, just remove the glow and shine */
 
 
-/* Also neutralize the generic button focus styles for this specific button */
-.feedback-button:focus-visible { outline: none !important; }
+/* Also neutralize the generic button focus styles for these specific buttons */
+.feedback-button:focus-visible,
+.docs-button:focus-visible { outline: none !important; }
 
 .main-content {
     flex: 1;
