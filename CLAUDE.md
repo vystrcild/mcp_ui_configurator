@@ -38,6 +38,9 @@ This is a vanilla HTML/CSS/JavaScript dashboard for Apify MCP (Model Context Pro
 - **assets/js/search.js**: Search utilities and API client code
 - **assets/css/styles.css**: Complete styling system
 
+### UI
+- IMPORTANT: Please, always check first if some UI components already exist or not in styles.css, so you're not creating still the same thing over and over.
+
 ### Key Features
 - **Actor Management**: Search and select Apify Store actors for MCP server configuration
 - **Tools Configuration**: Enable/disable various MCP tools (actor discovery, documentation, runs, storage)
