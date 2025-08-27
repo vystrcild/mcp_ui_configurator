@@ -1088,8 +1088,7 @@ a:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; border-ra
 }
 
 .tools-list .tool-item.selected {
-    background: rgba(30, 163, 77, 0.08);
-    border-color: rgba(30, 163, 77, 0.3);
+    border-color: rgba(30, 163, 77, 0.4);
 }
 
 .tool-info {
@@ -2289,6 +2288,10 @@ a:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; border-ra
 /* Hide mobile-intro on desktop */
 @media (min-width: 769px) {
     .mobile-intro { display: none; }
+    
+    .sidebar-info + .sidebar-info {
+        margin-top: 1.25rem;
+    }
 }
 
 /* Utility classes */

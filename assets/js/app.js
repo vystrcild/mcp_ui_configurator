@@ -326,6 +326,11 @@ function setupEventListeners() {
             if (integrationModal && integrationModal.classList.contains('active')) {
                 window.closeIntegrationModal();
             }
+            // Close feedback modal if it's open
+            const feedbackModal = document.getElementById('feedbackModalOverlay');
+            if (feedbackModal && feedbackModal.classList.contains('active')) {
+                window.closeFeedbackModal();
+            }
         }
     });
     
@@ -410,6 +415,28 @@ function setupEventListeners() {
         }
     }
 
+    // Feedback modal setup
+    const feedbackOverlay = document.getElementById('feedbackModalOverlay');
+    if (feedbackOverlay) {
+        feedbackOverlay.addEventListener('click', (e) => {
+            if (e.target === feedbackOverlay) {
+                window.closeFeedbackModal();
+            }
+        });
+        const feedbackCloseBtn = feedbackOverlay.querySelector('.modal-close');
+        if (feedbackCloseBtn) {
+            feedbackCloseBtn.addEventListener('click', window.closeFeedbackModal);
+        }
+    }
+
+    // Feedback button event listeners
+    document.querySelectorAll('.feedback-button').forEach(button => {
+        button.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.openFeedbackModal();
+        });
+    });
+
     // Keyboard support for integration cards
     document.querySelectorAll('.integration-card').forEach(card => {
         card.setAttribute('tabindex', '0');
@@ -450,6 +477,20 @@ function setupAccessibility() {
             modal.setAttribute('role', 'dialog');
             modal.setAttribute('aria-modal', 'true');
             modal.setAttribute('aria-labelledby', 'integrationTitle');
+        }
+    }
+
+    const feedbackOverlay = document.getElementById('feedbackModalOverlay');
+    if (feedbackOverlay) {
+        const modal = feedbackOverlay.querySelector('.modal');
+        const title = feedbackOverlay.querySelector('.modal-header h3');
+        if (modal) {
+            modal.setAttribute('role', 'dialog');
+            modal.setAttribute('aria-modal', 'true');
+            if (title) {
+                if (!title.id) title.id = 'feedbackModalTitle';
+                modal.setAttribute('aria-labelledby', title.id);
+            }
         }
     }
 }
@@ -2298,6 +2339,32 @@ function renderWindsurfJsonExamples() {
 
 window.closeIntegrationModal = function() {
     const modal = document.getElementById('integrationModalOverlay');
+    modal.classList.remove('active');
+    const modalBox = modal.querySelector('.modal');
+    if (modalBox) releaseFocus(modalBox);
+}
+
+// Feedback modal functions
+window.openFeedbackModal = function() {
+    const modal = document.getElementById('feedbackModalOverlay');
+    modal.classList.add('active');
+    const modalBox = modal.querySelector('.modal');
+    if (modalBox) trapFocus(modalBox);
+    
+    // Load the HubSpot form
+    const formContainer = document.querySelector('.hs-form-frame');
+    if (formContainer && window.hbspt && !formContainer.hasChildNodes()) {
+        window.hbspt.forms.create({
+            region: "na1",
+            portalId: "19497222",
+            formId: "c48f1f77-f9f3-4280-9024-97557abab652",
+            target: ".hs-form-frame"
+        });
+    }
+}
+
+window.closeFeedbackModal = function() {
+    const modal = document.getElementById('feedbackModalOverlay');
     modal.classList.remove('active');
     const modalBox = modal.querySelector('.modal');
     if (modalBox) releaseFocus(modalBox);
