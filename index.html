@@ -15,6 +15,24 @@
 </head>
 <body>
     <div class="app">
+        <div class="topbar-mobile">
+            <div class="topbar-left">
+                <img src="https://apify.com/img/apify-logo/logomark-32x32.svg" alt="Apify Logo" class="logo">
+                <span class="topbar-title">Apify MCP</span>
+            </div>
+            <div class="topbar-right">
+                <a href="https://docs.apify.com/platform/integrations/mcp" target="_blank" rel="noopener noreferrer" class="btn docs-callout add-actors-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14,2 14,8 20,8"/>
+                        <line x1="16" y1="13" x2="8" y2="13"/>
+                        <line x1="16" y1="17" x2="8" y2="17"/>
+                        <polyline points="10,9 9,9 8,9"/>
+                    </svg>
+                    Docs →
+                </a>
+            </div>
+        </div>
         <!-- Sidebar -->
         <aside class="sidebar">
             <div class="sidebar-header">
@@ -26,8 +44,9 @@
                 <h4>MCP Server Configuration</h4>
                 <p class="sidebar-description">Configure your Apify MCP server with Actors and tools for seamless integration with MCP clients.</p>
                 <div class="sidebar-info">
-                    <!-- Place this tag where you want the button to render. -->
-<a class="github-button" href="https://github.com/apify/actors-mcp-server" data-color-scheme="no-preference: dark_dimmed; light: dark; dark: dark_dimmed;" data-size="large" data-show-count="true" aria-label="Star apify/actors-mcp-server on GitHub">Star</a></div>
+                    <!-- Github button -->
+                    <a class="github-button" href="https://github.com/apify/actors-mcp-server" data-color-scheme="no-preference: dark_dimmed; light: dark; dark: dark_dimmed;" data-size="large" data-show-count="true" aria-label="Star apify/actors-mcp-server on GitHub">Star</a>
+                </div>
                 <div class="sidebar-info">
                     <a href="https://docs.apify.com/platform/integrations/mcp" target="_blank" rel="noopener noreferrer" class="docs-callout docs-link">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -55,9 +74,24 @@
 
         <!-- Main Content -->
         <main class="main-content">
-            
-
             <div class="main-body">
+            <!-- Mobile-only intro copied from sidebar; hidden on desktop -->
+            <div class="mobile-intro" aria-hidden="true">
+                <h3>MCP Server Configuration</h3>
+                <p class="sidebar-description">Configure your Apify MCP server with Actors and tools for seamless integration with MCP clients.</p>
+                <div class="sidebar-info">
+                    <a class="github-button" href="https://github.com/apify/actors-mcp-server" data-color-scheme="no-preference: dark_dimmed; light: dark; dark: dark_dimmed;" data-size="large" data-show-count="true" aria-label="Star apify/actors-mcp-server on GitHub">Star</a>
+                </div>
+                <div class="sidebar-info">
+                    <a href="https://console.apify.com/actors/1lSvMAaRcadrM1Vgv/issues" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm feedback-button" aria-label="Give us feedback on Apify">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                        </svg>
+                        Give us feedback
+                    </a>
+                </div>
+            </div>
+
                 <!-- Configuration Tab -->
                 <div class="tab-content active" id="configuration">
                     <div class="content-grid">
