@@ -21,12 +21,15 @@ app.use(helmet({
         directives: {
             "default-src": ["'self'"],
             "img-src": ["'self'", "data:", "https:"],
-            "script-src": ["'self'", "https:"],
+            "script-src": ["'self'", "https:", "'unsafe-inline'", "'unsafe-eval'"],
             "script-src-attr": ["'unsafe-inline'"],
             "style-src": ["'self'", "https:", "'unsafe-inline'"],
             "font-src": ["'self'", "https:", "data:"],
-            "connect-src": ["'self'", "https:"],
-            "frame-ancestors": ["'self'"]
+            "connect-src": ["'self'", "https:", "wss:", "ws:"],
+            "frame-src": ["'self'", "https://chatbot.getmindpal.com", "https://js.hsforms.net"],
+            "frame-ancestors": ["'self'"],
+            "worker-src": ["'self'", "blob:"],
+            "child-src": ["'self'", "blob:"]
         }
     }
 }));
@@ -253,8 +256,13 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
+// Serve the chat page
+app.get('/chat', (req, res) => {
+    res.sendFile(path.join(__dirname, 'chat.html'));
+});
+
 // Serve index.html for any other GET request (SPA fallback), excluding API and assets
-app.get(/^(?!\/(api|assets)).*$/, (req, res, next) => {
+app.get(/^(?!\/(api|assets|chat)).*$/, (req, res, next) => {
     if (req.method !== 'GET') return next();
     res.sendFile(path.join(__dirname, 'index.html'));
 });
